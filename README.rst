@@ -25,13 +25,27 @@ A PyTest plugin which provides an FTP fixture for your tests
 * Documentation: https://pytest-ftp-server.readthedocs.io.
 
 
-Features
---------
+Usage:
+------
 
-* TODO
+``ftpserver``
+  provides a threaded FTP server where you can upload files and test FTP
+  functionality. It has the following attributes:
+
+  * ``ftp_port`` - the server port as integer
+  * ``anon_root`` - the root of anonymous user
+  * ``ftp_home`` - the root of authenticated user
+
+
+See the tests directory for examples.
+
+
 
 Credits
 ---------
+
+This package was inspired by, https://pypi.python.org/pypi/pytest-localserver/
+made by Sebastian Rahlf, which lacks an FTP server.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
