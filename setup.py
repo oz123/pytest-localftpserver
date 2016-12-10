@@ -20,12 +20,12 @@ test_requirements = [
 
 setup(
     name='pytest_localftpserver',
-    version='0.1.0',
+    version='0.1.1',
     description="A PyTest plugin which provides an FTP fixture for your tests",
     long_description=readme + '\n\n' + history,
     author="Oz Tiram",
     author_email='oz.tiram@gmail.com',
-    url='https://github.com/oz123/pytest_localftpserver',
+    url='https://github.com/oz123/pytest-localftpserver',
     packages=find_packages(exclude=['tests']),
     include_package_data=True,
     install_requires=requirements,
