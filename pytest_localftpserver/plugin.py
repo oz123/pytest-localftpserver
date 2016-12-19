@@ -19,13 +19,15 @@ class SimpleFTPServer(FTPServer):
     https://github.com/Lukasa/requests-ftp/
     """
 
-    def __init__(self):
+    def __init__(self, username, password, ftp_home=None):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp()
-        self._ftp_home = tempfile.mkdtemp()
-
+        if not ftp_home:
+            self._ftp_home = tempfile.mkdtemp()
+        self.username = username
+        self.password = password
         authorizer = DummyAuthorizer()
-        authorizer.add_user(self.ftp_user, self.ftp_password, self.ftp_home,
+        authorizer.add_user(self.username, self.password, self.ftp_home,
                             perm='elradfmwM')
         authorizer.add_anonymous(self.anon_root)
 
@@ -45,16 +47,6 @@ class SimpleFTPServer(FTPServer):
     def anon_root(self):
         """Home directory for the anonymous user"""
         return self._anon_root
-
-    @property
-    def ftp_user(self):
-        """User name added for authenticated connections"""
-        return 'fakeusername'
-
-    @property
-    def ftp_password(self):
-        """Password for ftp_user"""
-        return 'qweqwe'
 
     @property
     def ftp_home(self):
@@ -80,8 +72,8 @@ class SimpleFTPServer(FTPServer):
 
 class ThreadedFTPServer(threading.Thread):
 
-    def __init__(self, **kwargs):
-        self._server = SimpleFTPServer()
+    def __init__(self, username, password, ftp_home, **kwargs):
+        self._server = SimpleFTPServer(username, password, ftp_home)
         self.server_home = self._server.ftp_home
         self.anon_root = self._server.anon_root
         self.server_port = self._server.ftp_port
@@ -97,7 +89,7 @@ class ThreadedFTPServer(threading.Thread):
 
 
 @pytest.fixture(scope="module", autouse=True)
-def ftpserver():
+def ftpserver(request):
     """The returned ``ftpsever`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` running on localhost.  It has the following
     attributes:
@@ -105,9 +97,19 @@ def ftpserver():
     * ``ftp_port`` - the server port as integer
     * ``anon_root`` - the root of anonymous user
     * ``ftp_home`` - the root of authenticated user
+
+    If you wish to control the credentials and home for the authenticated user,
+    define in the test module the following 3 global variables:
+
+    * ``ftp_username`` - login name (default: fakeusername).
+    * ``ftp_password`` - login password (default: qweqweqwe).
+    * ``ftp_home`` - the root for the authenticated user.
     """
     from pytest_localftpserver.plugin import ThreadedFTPServer
-    server = ThreadedFTPServer()
+    ftp_user = getattr(request.module, "FTP_USER", "fakeusername")
+    ftp_password = getattr(request.module, "FTP_PASS", "qweqwe")
+    ftp_home = getattr(request.module, "FTP_HOME", "")
+    server = ThreadedFTPServer(ftp_user, ftp_password, ftp_home)
     server.daemon = True
     server.start()
     yield server
