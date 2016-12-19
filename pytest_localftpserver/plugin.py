@@ -96,8 +96,8 @@ class ThreadedFTPServer(threading.Thread):
         self._server.stop()
 
 
-@pytest.fixture
-def ftpserver(scope="module", autouse=True):
+@pytest.fixture(scope="module", autouse=True)
+def ftpserver():
     """The returned ``ftpsever`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` running on localhost.  It has the following
     attributes:
