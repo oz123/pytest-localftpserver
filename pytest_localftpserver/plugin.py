@@ -19,7 +19,7 @@ class SimpleFTPServer(FTPServer):
     https://github.com/Lukasa/requests-ftp/
     """
 
-    def __init__(self, username, password, ftp_home=None):
+    def __init__(self, username, password, ftp_home=None, ftp_port=0):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp()
         if not ftp_home:
@@ -33,10 +33,9 @@ class SimpleFTPServer(FTPServer):
 
         handler = FTPHandler
         handler.authorizer = authorizer
-
         # Create a socket on any free port
         self._ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._ftp_socket.bind(('127.0.0.1', 0))
+        self._ftp_socket.bind(('127.0.0.1', ftp_port))
         self._ftp_port = self._ftp_socket.getsockname()[1]
 
         # Create a new pyftpdlib server with the socket and handler we've
@@ -55,7 +54,6 @@ class SimpleFTPServer(FTPServer):
 
     @property
     def ftp_port(self):
-        """TCP port that the server is listening on"""
         return self._ftp_port
 
     def __del__(self):
@@ -72,8 +70,8 @@ class SimpleFTPServer(FTPServer):
 
 class ThreadedFTPServer(threading.Thread):
 
-    def __init__(self, username, password, ftp_home, **kwargs):
-        self._server = SimpleFTPServer(username, password, ftp_home)
+    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
+        self._server = SimpleFTPServer(username, password, ftp_home, ftp_port)
         self.server_home = self._server.ftp_home
         self.anon_root = self._server.anon_root
         self.server_port = self._server.ftp_port
@@ -88,7 +86,7 @@ class ThreadedFTPServer(threading.Thread):
         self._server.stop()
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def ftpserver(request):
     """The returned ``ftpsever`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` running on localhost.  It has the following
@@ -109,7 +107,8 @@ def ftpserver(request):
     ftp_user = getattr(request.module, "FTP_USER", "fakeusername")
     ftp_password = getattr(request.module, "FTP_PASS", "qweqwe")
     ftp_home = getattr(request.module, "FTP_HOME", "")
-    server = ThreadedFTPServer(ftp_user, ftp_password, ftp_home)
+    ftp_port = getattr(request.module, "FTP_PORT", "")
+    server = ThreadedFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
     server.daemon = True
     server.start()
     yield server
