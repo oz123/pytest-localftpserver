@@ -76,14 +76,19 @@ class ThreadedFTPServer(threading.Thread):
         self.anon_root = self._server.anon_root
         self.server_port = self._server.ftp_port
 
-        super(ThreadedFTPServer, self).__init__(
-            name=self.__class__, target=self._server.serve_forever)
+        super(ThreadedFTPServer, self).__init__(name=self.__class__)
+
+    def run(self):
+        self._server.serve_forever(timeout=1, blocking=True)
 
     def join(self):
         self._server.stop()
 
     def stop(self):
         self._server.stop()
+
+    #def __del__(self):
+    #    self.stop()
 
 
 @pytest.fixture(scope="module")
