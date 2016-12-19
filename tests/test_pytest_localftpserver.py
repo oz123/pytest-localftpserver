@@ -21,13 +21,6 @@ def test_ftpserver(ftpserver):
     assert ftpserver.server_port
 
 
-def test_ftp_stopped(ftpserver):
-    ftpserver.stop()
-    ftp = FTP()
-    with pytest.raises(ConnectionRefusedError):
-        ftp.connect("localhost", port=ftpserver.server_port)
-
-
 def test_file_upload(ftpserver):
     ftp = FTP()
     ftp.connect("localhost", port=ftpserver.server_port)
@@ -38,3 +31,9 @@ def test_file_upload(ftpserver):
 
     assert os.path.exists(os.path.join(ftpserver.server_home, "FOO"))
 
+
+def test_ftp_stopped(ftpserver):
+    ftpserver.stop()
+    ftp = FTP()
+    with pytest.raises(ConnectionRefusedError):
+        ftp.connect("localhost", port=ftpserver.server_port)
