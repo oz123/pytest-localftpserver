@@ -39,7 +39,17 @@ Usage:
 
 See the tests directory for examples.
 
+You need pytest-env to use this plugin. Sample config:
 
+```
+$ cat pytest.ini
+[pytest]
+env =
+   FTP_PORT=31175
+   FTP_USER=benz
+   FTP_PASS=erni1
+
+```
 
 Credits
 ---------
