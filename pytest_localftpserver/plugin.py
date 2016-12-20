@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import multiprocessing
 import os
 import shutil
 import socket
 import tempfile
-import threading
 
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -62,13 +62,10 @@ class SimpleFTPServer(FTPServer):
 
     def stop(self):
         self.close_all()
-        if hasattr(self, '_anon_root'):
-            shutil.rmtree(self._anon_root, ignore_errors=True)
+        for item in ['_anon_root', '_ftp_home']:
+            if hasattr(self, item):
+                shutil.rmtree(self._anon_root, ignore_errors=True)
 
-        if hasattr(self, '_ftp_home'):
-            shutil.rmtree(self._ftp_home, ignore_errors=True)
-
-import multiprocessing
 
 class MPFTPServer(multiprocessing.Process):
 
@@ -113,6 +110,8 @@ def ftpserver(request):
     ftp_home =  os.getenv("FTP_HOME", "")
     ftp_port = int(os.getenv("FTP_PORT", 0))
     server = MPFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
+    # This is a must in order to clear used sockets
+    server.daemon = True
     server.start()
     yield server
     server.join()
