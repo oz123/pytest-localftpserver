@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import shutil
 import socket
 import tempfile
@@ -67,8 +68,9 @@ class SimpleFTPServer(FTPServer):
         if hasattr(self, '_ftp_home'):
             shutil.rmtree(self._ftp_home, ignore_errors=True)
 
+import multiprocessing
 
-class ThreadedFTPServer(threading.Thread):
+class MPFTPServer(multiprocessing.Process):
 
     def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
         self._server = SimpleFTPServer(username, password, ftp_home, ftp_port)
@@ -76,10 +78,10 @@ class ThreadedFTPServer(threading.Thread):
         self.anon_root = self._server.anon_root
         self.server_port = self._server.ftp_port
 
-        super(ThreadedFTPServer, self).__init__(name=self.__class__)
+        super().__init__(**kwargs)
 
     def run(self):
-        self._server.serve_forever(timeout=1, blocking=True)
+        self._server.serve_forever()
 
     def join(self):
         self._server.stop()
@@ -87,11 +89,8 @@ class ThreadedFTPServer(threading.Thread):
     def stop(self):
         self._server.stop()
 
-    #def __del__(self):
-    #    self.stop()
 
-
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session", autouse=True)
 def ftpserver(request):
     """The returned ``ftpsever`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` running on localhost.  It has the following
@@ -108,17 +107,20 @@ def ftpserver(request):
     * ``ftp_password`` - login password (default: qweqweqwe).
     * ``ftp_home`` - the root for the authenticated user.
     """
-    from pytest_localftpserver.plugin import ThreadedFTPServer
-    ftp_user = getattr(request.module, "FTP_USER", "fakeusername")
-    ftp_password = getattr(request.module, "FTP_PASS", "qweqwe")
-    ftp_home = getattr(request.module, "FTP_HOME", "")
-    ftp_port = getattr(request.module, "FTP_PORT", "")
-    server = ThreadedFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
-    server.daemon = True
+    from pytest_localftpserver.plugin import MPFTPServer
+    ftp_user = os.getenv("FTP_USER", "fakeusername")
+    ftp_password = os.getenv("FTP_PASS", "qweqwe")
+    ftp_home =  os.getenv("FTP_HOME", "")
+    ftp_port = int(os.getenv("FTP_PORT", 0))
+    server = MPFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
     server.start()
     yield server
     server.join()
 
+    #def fin():
+    #    server._server.close_all()
+
+    #request.addfinalizer(fin)
 
 if __name__ == "__main__":
     server = SimpleFTPServer()
