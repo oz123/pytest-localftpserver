@@ -13,6 +13,7 @@ from pyftpdlib.servers import FTPServer
 
 import pytest
 
+
 class SimpleFTPServer(FTPServer):
     """
     Starts a simple FTP server on a random free port.
@@ -70,7 +71,8 @@ class SimpleFTPServer(FTPServer):
 class MPFTPServer(multiprocessing.Process):
 
     def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
-        self._server = SimpleFTPServer(username, password, ftp_home, ftp_port)
+        self.username = username
+        self.password = password
         self.server_home = self._server.ftp_home
         self.anon_root = self._server.anon_root
         self.server_port = self._server.ftp_port
@@ -78,12 +80,11 @@ class MPFTPServer(multiprocessing.Process):
         super().__init__(**kwargs)
 
     def run(self):
+        self._server = SimpleFTPServer(self.username, self.password,
+                                       self.server_home, self.server_port)
         self._server.serve_forever()
 
     def join(self):
-        self._server.stop()
-
-    def stop(self):
         self._server.stop()
 
 
@@ -107,7 +108,7 @@ def ftpserver(request):
     from pytest_localftpserver.plugin import MPFTPServer
     ftp_user = os.getenv("FTP_USER", "fakeusername")
     ftp_password = os.getenv("FTP_PASS", "qweqwe")
-    ftp_home =  os.getenv("FTP_HOME", "")
+    ftp_home = os.getenv("FTP_HOME", "")
     ftp_port = int(os.getenv("FTP_PORT", 0))
     server = MPFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
     # This is a must in order to clear used sockets
@@ -116,10 +117,10 @@ def ftpserver(request):
     yield server
     server.join()
 
-    #def fin():
-    #    server._server.close_all()
+    def fin():
+        server._server.close_all()
 
-    #request.addfinalizer(fin)
+    request.addfinalizer(fin)
 
 if __name__ == "__main__":
     server = SimpleFTPServer()
@@ -127,6 +128,3 @@ if __name__ == "__main__":
     print("Anonymous root: %s" % server.anon_root)
     print("Authenticated root: %s" % server.ftp_home)
     server.serve_forever()
-
-
-
