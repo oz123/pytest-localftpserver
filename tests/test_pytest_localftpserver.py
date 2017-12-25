@@ -8,17 +8,26 @@ test_pytest_localftpserver
 Tests for `pytest_localftpserver` module.
 """
 
+from __future__ import print_function
+
 import os
+import socket
+import sys
 from ftplib import FTP
 
 import pytest
+
 from pytest_localftpserver import plugin
 
 
+if sys.version_info[0] == 3:
+    PYTHON3 = True
+else:
+    PYTHON3 = False
+
+
 def test_ftpserver(ftpserver):
-    assert isinstance(ftpserver, plugin.ThreadedFTPServer)
-    assert ftpserver.server_home
-    assert ftpserver.server_port
+    assert isinstance(ftpserver, plugin.MPFTPServer)
 
 
 def test_file_upload(ftpserver):
@@ -35,5 +44,10 @@ def test_file_upload(ftpserver):
 def test_ftp_stopped(ftpserver):
     ftpserver.stop()
     ftp = FTP()
-    with pytest.raises(ConnectionRefusedError):
-        ftp.connect("localhost", port=ftpserver.server_port)
+    if PYTHON3:
+        with pytest.raises(OSError):
+            ftp.connect("localhost", port=ftpserver.server_port)
+    else:
+        #  python2.7 raises an different error than python3.3>
+        with pytest.raises(socket.error):
+            ftp.connect("localhost", port=ftpserver.server_port)

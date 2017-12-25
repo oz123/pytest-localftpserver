@@ -71,20 +71,31 @@ class SimpleFTPServer(FTPServer):
 class MPFTPServer(multiprocessing.Process):
 
     def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
-        self.username = username
-        self.password = password
-        self.server_home = ftp_home
-        self.server_port = ftp_port
 
-        super().__init__(**kwargs)
+        super(MPFTPServer, self).__init__(**kwargs)
+
+        self._server = SimpleFTPServer(username, password,
+                                       ftp_home, ftp_port)
 
     def run(self):
-        self._server = SimpleFTPServer(self.username, self.password,
-                                       self.server_home, self.server_port)
         self._server.serve_forever()
-    
+
+    @property
+    def server_port(self):
+        return self._server._ftp_port
+
+    @property
+    def server_home(self):
+        """FTP home for the ftp_user"""
+        if hasattr(self._server, "_ftp_home"):
+            return self._server._ftp_home
+        else:
+            return self._server._anon_root
+
     def stop(self):
         self._server.stop()
+        self.terminate()
+
 
 @pytest.fixture(scope="session", autouse=True)
 def ftpserver(request):
@@ -103,7 +114,7 @@ def ftpserver(request):
     * ``ftp_password`` - login password (default: qweqweqwe).
     * ``ftp_home`` - the root for the authenticated user.
     """
-    from pytest_localftpserver.plugin import MPFTPServer
+    # from pytest_localftpserver.plugin import MPFTPServer
     ftp_user = os.getenv("FTP_USER", "fakeusername")
     ftp_password = os.getenv("FTP_PASS", "qweqwe")
     ftp_home = os.getenv("FTP_HOME", "")
@@ -113,8 +124,9 @@ def ftpserver(request):
     server.daemon = True
     server.start()
     yield server
-    #server.join()
-    #server.stop()
+    # server.join()
+    # server.stop()
+
 
 if __name__ == "__main__":
     server = SimpleFTPServer()
