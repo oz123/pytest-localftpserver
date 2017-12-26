@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import multiprocessing
 import os
 import shutil
 import socket
 import tempfile
+import threading
 
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -68,7 +68,7 @@ class SimpleFTPServer(FTPServer):
                 shutil.rmtree(self._anon_root, ignore_errors=True)
 
 
-class MPFTPServer(multiprocessing.Process):
+class MPFTPServer(threading.Thread):
 
     def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
 
@@ -94,7 +94,9 @@ class MPFTPServer(multiprocessing.Process):
 
     def stop(self):
         self._server.stop()
-        self.terminate()
+
+    def __del__(self):
+        self.stop()
 
 
 @pytest.fixture(scope="session", autouse=True)
