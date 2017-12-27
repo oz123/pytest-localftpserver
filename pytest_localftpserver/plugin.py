@@ -90,7 +90,11 @@ class MPFTPServer(threading.Thread):
         if hasattr(self._server, "_ftp_home"):
             return self._server._ftp_home
         else:
-            return self._server._anon_root
+            return None
+
+    @property
+    def anon_root(self):
+        return self._server._anon_root
 
     def stop(self):
         self._server.stop()
