@@ -17,8 +17,7 @@ from ftplib import FTP
 
 import pytest
 
-# from pytest_localftpserver import plugin
-from pytest_localftpserver.plugin import ftpserver, MPFTPServer
+from pytest_localftpserver import plugin
 
 
 if sys.version_info[0] == 3:
@@ -28,7 +27,7 @@ else:
 
 
 def test_ftpserver(ftpserver):
-    assert isinstance(ftpserver, MPFTPServer)
+    assert isinstance(ftpserver, plugin.MPFTPServer)
 
 
 def test_file_upload(ftpserver):
