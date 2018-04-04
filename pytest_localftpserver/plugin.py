@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import multiprocessing
 import os
 import shutil
 import socket
+import sys
 import tempfile
 import threading
 
@@ -12,6 +14,11 @@ from pyftpdlib.handlers import FTPHandler
 from pyftpdlib.servers import FTPServer
 
 import pytest
+
+if sys.platform.startswith('linux'):
+    USE_PROCESS = True
+else:
+    USE_PROCESS = False
 
 
 class SimpleFTPServer(FTPServer):
@@ -68,17 +75,12 @@ class SimpleFTPServer(FTPServer):
                 shutil.rmtree(self._anon_root, ignore_errors=True)
 
 
-class MPFTPServer(threading.Thread):
+class BaseMPFTPServer(object):
 
-    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
-
-        super(MPFTPServer, self).__init__(**kwargs)
+    def __init__(self, username, password, ftp_home, ftp_port):
 
         self._server = SimpleFTPServer(username, password,
                                        ftp_home, ftp_port)
-
-    def run(self):
-        self._server.serve_forever()
 
     @property
     def server_port(self):
@@ -103,6 +105,34 @@ class MPFTPServer(threading.Thread):
         self.stop()
 
 
+class ThreadFTPServer(BaseMPFTPServer, threading.Thread):
+
+    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
+        # inheriting isn't done via super, since the strict order matters
+        threading.Thread.__init__(self, **kwargs)
+        BaseMPFTPServer.__init__(self, username, password,
+                                 ftp_home, ftp_port)
+
+    def run(self):
+        self._server.serve_forever()
+
+
+class ProcessFTPServer(BaseMPFTPServer, multiprocessing.Process):
+
+    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
+        # inheriting isn't done via super, since the strict order matters
+        multiprocessing.Process.__init__(self, **kwargs)
+        BaseMPFTPServer.__init__(self, username, password,
+                                 ftp_home, ftp_port)
+
+    def run(self):
+        self._server.serve_forever()
+
+    def stop(self):
+        self._server.stop()
+        self.terminate()
+
+
 @pytest.fixture(scope="session", autouse=True)
 def ftpserver(request):
     """The returned ``ftpsever`` provides a threaded instance of
@@ -125,17 +155,20 @@ def ftpserver(request):
     ftp_password = os.getenv("FTP_PASS", "qweqwe")
     ftp_home = os.getenv("FTP_HOME", "")
     ftp_port = int(os.getenv("FTP_PORT", 0))
-    server = MPFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
+    if USE_PROCESS:
+        server = ProcessFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
+    else:
+        server = ThreadFTPServer(ftp_user, ftp_password, ftp_home, ftp_port)
     # This is a must in order to clear used sockets
     server.daemon = True
     server.start()
     yield server
-    # server.join()
-    # server.stop()
+    if USE_PROCESS:
+        server.terminate()
 
 
 if __name__ == "__main__":
-    server = SimpleFTPServer()
+    server = SimpleFTPServer("fakeusername", "qweqwe")
     print("FTPD running on port %d" % server.ftp_port)
     print("Anonymous root: %s" % server.anon_root)
     print("Authenticated root: %s" % server.ftp_home)

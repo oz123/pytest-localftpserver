@@ -27,7 +27,10 @@ else:
 
 
 def test_ftpserver(ftpserver):
-    assert isinstance(ftpserver, plugin.MPFTPServer)
+    if plugin.USE_PROCESS:
+        assert isinstance(ftpserver, plugin.ProcessFTPServer)
+    else:
+        assert isinstance(ftpserver, plugin.ThreadFTPServer)
 
 
 def test_file_upload(ftpserver):
@@ -44,10 +47,15 @@ def test_file_upload(ftpserver):
 def test_ftp_stopped(ftpserver):
     ftpserver.stop()
     ftp = FTP()
+
     if PYTHON3:
-        with pytest.raises(OSError):
-            ftp.connect("localhost", port=ftpserver.server_port)
+        if plugin.USE_PROCESS:
+            with pytest.raises( (ConnectionRefusedError, ConnectionResetError) ):
+                ftp.connect("localhost", port=ftpserver.server_port)
+        else:
+            with pytest.raises(OSError):
+                ftp.connect("localhost", port=ftpserver.server_port)
     else:
-        #  python2.7 raises an different error than python3.3>
+        #  python2.7 raises an different error than python3
         with pytest.raises(socket.error):
             ftp.connect("localhost", port=ftpserver.server_port)
