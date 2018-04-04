@@ -16,7 +16,7 @@ matrix:
     - language: generic
       python: 2.7
       os: osx
-      before_install:     
+      before_install:
         - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
         - bash miniconda.sh -b -p $HOME/miniconda
         - export PATH="$HOME/miniconda/bin:$PATH"
@@ -26,7 +26,7 @@ matrix:
         - pip install tox
         - conda install -y --name py27 virtualenv
       script: tox -e py27
-      
+
     - language: generic
       python: 3.4
       os: osx
@@ -40,7 +40,7 @@ matrix:
         - pip install tox
         - conda install -y --name py34 virtualenv
       script: tox -e py34
-      
+
     - language: generic
       python: 3.5
       os: osx
@@ -54,7 +54,7 @@ matrix:
         - pip install tox
         - conda install -y --name py35 virtualenv
       script: tox -e py35
-      
+
     - language: generic
       python: 3.6
       os: osx
@@ -68,7 +68,7 @@ matrix:
         - pip install tox
         - conda install -y --name py36 virtualenv
       script: tox -e py36
-install: 
+install:
   - pip install tox-travis
 
 script: tox
