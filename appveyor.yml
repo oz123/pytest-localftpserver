@@ -11,7 +11,7 @@ environment:
     - PYTHON: C:\Python36-x64
       PYTHON_VERSION: 3.6
       PYTHON_ARCH: 64
-      
+
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
   - "ECHO \"%APPVEYOR_SCHEDULED_BUILD%\""
@@ -30,9 +30,9 @@ cache:
   - '%LOCALAPPDATA%\pip\Cache\http'
   - '%LOCALAPPDATA%\pip\Cache\wheels'
   # Cache Tox envs
-  - 'C:\projects\pytest-localftpserver\.tox'  
-        
-        
+  - 'C:\projects\pytest-localftpserver\.tox'
+
+
 install:
   # Show size of cache
   - C:\cygwin\bin\du -hs "%LOCALAPPDATA%\pip\Cache"
@@ -41,13 +41,14 @@ install:
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
   # Upgrade to the latest pip.
-  - 'pip install -U pip setuptools wheel'
-  
+  # calling pip with "%CMD_IN_ENV% python -m" prevents an access denied error
+  - '%CMD_IN_ENV% python -m pip install -U pip setuptools wheel'
+
   # install tox
-  - 'pip install -U tox'
+  - '%CMD_IN_ENV% python -m pip install -U tox'
 
 build: none
-  
+
 test_script:
   - "tox"
 
