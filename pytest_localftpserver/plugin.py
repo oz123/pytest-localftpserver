@@ -73,9 +73,8 @@ class MPFTPServer(multiprocessing.Process):
     def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
         self.username = username
         self.password = password
-        self.server_home = self._server.ftp_home
-        self.anon_root = self._server.anon_root
-        self.server_port = self._server.ftp_port
+        self.server_home = ftp_home
+        self.server_port = ftp_port
 
         super().__init__(**kwargs)
 
@@ -83,10 +82,9 @@ class MPFTPServer(multiprocessing.Process):
         self._server = SimpleFTPServer(self.username, self.password,
                                        self.server_home, self.server_port)
         self._server.serve_forever()
-
-    def join(self):
+    
+    def stop(self):
         self._server.stop()
-
 
 @pytest.fixture(scope="session", autouse=True)
 def ftpserver(request):
@@ -115,12 +113,8 @@ def ftpserver(request):
     server.daemon = True
     server.start()
     yield server
-    server.join()
-
-    def fin():
-        server._server.close_all()
-
-    request.addfinalizer(fin)
+    #server.join()
+    #server.stop()
 
 if __name__ == "__main__":
     server = SimpleFTPServer()
