@@ -65,7 +65,7 @@ class SimpleFTPServer(FTPServer):
         self.close_all()
         for item in ['_anon_root', '_ftp_home']:
             if hasattr(self, item):
-                shutil.rmtree(self._anon_root, ignore_errors=True)
+                shutil.rmtree(getattr(self, item), ignore_errors=True)
 
 
 class MPFTPServer(multiprocessing.Process):
