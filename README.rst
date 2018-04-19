@@ -6,7 +6,7 @@ PyTest FTP Server
 .. image:: https://img.shields.io/pypi/v/pytest_localftpserver.svg
         :target: https://pypi.python.org/pypi/pytest_localftpserver
 
-.. image:: https://img.shields.io/travis/oz123/pytest_localftpserver.svg
+.. image:: https://travis-ci.org/oz123/pytest-localftpserver.svg?branch=master
         :target: https://travis-ci.org/oz123/pytest_localftpserver
 
 .. image:: https://readthedocs.org/projects/pytest-ftp-server/badge/?version=latest
