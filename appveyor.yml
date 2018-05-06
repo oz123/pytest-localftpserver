@@ -5,6 +5,8 @@ clone_depth: 50
 
 environment:
   PYTEST: py.test -n3 --maxfail 5 --durations=10 --junitxml=junit-results.xml
+  # uncomment to disable cache restore
+#  APPVEYOR_CACHE_SKIP_RESTORE: true
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
   matrix:
@@ -35,8 +37,8 @@ cache:
 
 install:
   # Show size of cache
-  - C:\cygwin\bin\du -hs "%LOCALAPPDATA%\pip\Cache"
-  - C:\cygwin\bin\du -hs "C:\projects\pytest-localftpserver\.tox"
+  - if exist "%LOCALAPPDATA%\pip\Cache" C:\cygwin\bin\du -hs "%LOCALAPPDATA%\pip\Cache"
+  - if exist "C:\projects\pytest-localftpserver\.tox" C:\cygwin\bin\du -hs "C:\projects\pytest-localftpserver\.tox"
   # set python path
   - SET PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
 
@@ -45,14 +47,20 @@ install:
   - '%CMD_IN_ENV% python -m pip install -U pip setuptools wheel'
 
   # install tox
-  - '%CMD_IN_ENV% python -m pip install -U tox'
+  - '%CMD_IN_ENV% python -m pip install -U tox coverage codecov'
 
 build: none
 
 test_script:
-  - "tox"
+  # delete old .coverage file
+  - coverage erase
+  - tox
+
+artifacts:
+  - path: .coverage
 
 on_finish:
+  - codecov
   # Remove old or huge cache files to hopefully not exceed the 1GB cache limit.
   #
   # If the cache limit is reached, the cache will not be updated (of not even

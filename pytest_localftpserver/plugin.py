@@ -32,7 +32,11 @@ class SimpleFTPServer(FTPServer):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp()
         if not ftp_home:
-            self._ftp_home = tempfile.mkdtemp()
+            self.temp_ftp_home = True
+            self._ftp_home = tempfile.mkdtemp(prefix="ftp_home_")
+        else:
+            self.temp_ftp_home = False
+            self._ftp_home = ftp_home
         self.username = username
         self.password = password
         authorizer = DummyAuthorizer()
@@ -70,9 +74,15 @@ class SimpleFTPServer(FTPServer):
 
     def stop(self):
         self.close_all()
-        for item in ['_anon_root', '_ftp_home']:
-            if hasattr(self, item):
-                shutil.rmtree(getattr(self, item), ignore_errors=True)
+        self.clear_tmp_dirs()
+
+    def clear_tmp_dirs(self):
+        """
+        Clears all temp files generated on the FTP server
+        """
+        shutil.rmtree(self._anon_root, ignore_errors=True)
+        if self.temp_ftp_home:
+            shutil.rmtree(self._ftp_home, ignore_errors=True)
 
 
 class BaseMPFTPServer(object):
@@ -81,22 +91,21 @@ class BaseMPFTPServer(object):
 
         self._server = SimpleFTPServer(username, password,
                                        ftp_home, ftp_port)
+        self.username = self._server.username
+        self.password = self._server.password
 
     @property
     def server_port(self):
-        return self._server._ftp_port
+        return self._server.ftp_port
 
     @property
     def server_home(self):
         """FTP home for the ftp_user"""
-        if hasattr(self._server, "_ftp_home"):
-            return self._server._ftp_home
-        else:
-            return None
+        return self._server.ftp_home
 
     @property
     def anon_root(self):
-        return self._server._anon_root
+        return self._server.anon_root
 
     def stop(self):
         self._server.stop()
