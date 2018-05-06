@@ -17,6 +17,11 @@ PyTest FTP Server
      :target: https://pyup.io/repos/github/oz123/pytest_localftpserver/
      :alt: Updates
 
+.. image:: https://coveralls.io/repos/github/oz123/pytest-localftpserver/badge.svg
+     :target: https://coveralls.io/github/oz123/pytest-localftpserver
+     :alt: Coverage
+
+
 
 A PyTest plugin which provides an FTP fixture for your tests
 
