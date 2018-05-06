@@ -96,19 +96,16 @@ class BaseMPFTPServer(object):
 
     @property
     def server_port(self):
-        return self._server._ftp_port
+        return self._server.ftp_port
 
     @property
     def server_home(self):
         """FTP home for the ftp_user"""
-        if hasattr(self._server, "_ftp_home"):
-            return self._server._ftp_home
-        else:
-            return None
+        return self._server.ftp_home
 
     @property
     def anon_root(self):
-        return self._server._anon_root
+        return self._server.anon_root
 
     def stop(self):
         self._server.stop()
