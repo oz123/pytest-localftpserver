@@ -91,6 +91,8 @@ class BaseMPFTPServer(object):
 
         self._server = SimpleFTPServer(username, password,
                                        ftp_home, ftp_port)
+        self.username = self._server.username
+        self.password = self._server.password
 
     @property
     def server_port(self):
