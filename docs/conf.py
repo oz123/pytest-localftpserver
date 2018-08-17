@@ -40,7 +40,17 @@ import pytest_localftpserver
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.autosummary',
+              'sphinx.ext.viewcode',
+              'sphinx.ext.napoleon']
+
+autoclass_content = "both"
+autosummary_generate = True
+add_module_names = False
+autodoc_member_order = "bysource"
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -55,7 +65,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyTest FTP Server'
+project = u'PyTest local FTP Server'
 copyright = u"2016, Oz Tiram"
 
 # The version info for the project you're documenting, acts as replacement
@@ -111,7 +121,7 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -142,7 +152,7 @@ html_theme = 'default'
 # here, relative to this directory. They are copied after the builtin
 # static files, so a file named "default.css" will overwrite the builtin
 # "default.css".
-html_static_path = ['_static']
+#html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
@@ -209,7 +219,7 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'pytest_localftpserver.tex',
-     u'PyTest FTP Server Documentation',
+     u'PyTest local FTP Server Documentation',
      u'Oz Tiram', 'manual'),
 ]
 
@@ -240,7 +250,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'pytest_localftpserver',
-     u'PyTest FTP Server Documentation',
+     u'PyTest local FTP Server Documentation',
      [u'Oz Tiram'], 1)
 ]
 
@@ -255,7 +265,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'pytest_localftpserver',
-     u'PyTest FTP Server Documentation',
+     u'PyTest local FTP Server Documentation',
      u'Oz Tiram',
      'pytest_localftpserver',
      'One line description of project.',

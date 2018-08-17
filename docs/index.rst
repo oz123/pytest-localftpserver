@@ -1,16 +1,17 @@
-Welcome to PyTest FTP Server's documentation!
-======================================
+Welcome to PyTest local FTP Server's documentation!
+===================================================
 
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
 
-   readme
-   installation
-   usage
-   contributing
-   authorshistory
+    installation
+    usage
+    api_doc
+    contributing
+    authors
+    history
 
 Indices and tables
 ==================
