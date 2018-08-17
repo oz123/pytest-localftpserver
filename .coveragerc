@@ -1,9 +1,11 @@
 [run]
 branch = True
-include = pytest_localftpserver/plugin.py
+include = pytest_localftpserver/*
+#          tests/*
+# uncomment the above line if you want to see if all tests did run
 omit = setup.py
        pytest_localftpserver/__init__.py
-       tests/*
+       tests/__init__.py
 
 [report]
 # Regexes for lines to exclude from consideration

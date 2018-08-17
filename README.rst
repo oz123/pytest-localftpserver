@@ -1,13 +1,19 @@
-===============================
+=================
 PyTest FTP Server
-===============================
+=================
 
 
 .. image:: https://img.shields.io/pypi/v/pytest_localftpserver.svg
         :target: https://pypi.python.org/pypi/pytest_localftpserver
 
+.. image:: https://img.shields.io/pypi/pyversions/pytest_localftpserver.svg
+    :target: https://pypi.org/project/pytest/
+
 .. image:: https://travis-ci.org/oz123/pytest-localftpserver.svg?branch=master
         :target: https://travis-ci.org/oz123/pytest-localftpserver
+
+.. image:: https://ci.appveyor.com/api/projects/status/github/oz123/pytest-localftpserver?svg=true
+        :target: https://ci.appveyor.com/project/oz123/pytest-localftpserver/branch/master
 
 .. image:: https://readthedocs.org/projects/pytest-ftp-server/badge/?version=latest
         :target: https://pytest-ftp-server.readthedocs.io/en/latest/?badge=latest
@@ -22,7 +28,6 @@ PyTest FTP Server
      :alt: Coverage
 
 
-
 A PyTest plugin which provides an FTP fixture for your tests
 
 
@@ -31,9 +36,9 @@ A PyTest plugin which provides an FTP fixture for your tests
 
 
 Usage:
-------
+======
 
-``ftpserver``
+  ``ftpserver``
   provides a threaded FTP server where you can upload files and test FTP
   functionality. It has the following attributes:
 
@@ -42,22 +47,38 @@ Usage:
   * ``ftp_home`` - the root of authenticated user
 
 
-See the tests directory for examples.
+See the tests directory or the documentation for examples.
 
-You need pytest-env to use this plugin. Sample config:
+You need `pytest-env <https://pypi.org/project/pytest-env/>`_  or
+`tox <https://pypi.org/project/tox/>`_
+to change the default settings of this plugin.
+Sample config for pytest-cov::
 
-```
-$ cat pytest.ini
-[pytest]
-env =
-   FTP_PORT=31175
-   FTP_USER=benz
-   FTP_PASS=erni1
+    $ cat pytest.ini
+    [pytest]
+    env =
+        FTP_PORT=31175
+        FTP_USER=benz
+        FTP_PASS=erni1
 
-```
+
+Sample config for Tox::
+
+    $ cat tox.ini
+    [tox]
+    envlist = py{27,34,35,36}, flake8
+
+    [testenv]
+    setenv =
+        FTP_USER = benz
+        FTP_PASS = erni1
+        FTP_HOME = {envtmpdir}
+        FTP_PORT = 31175
+    commands =
+        py.test tests
 
 Credits
----------
+=======
 
 This package was inspired by, https://pypi.python.org/pypi/pytest-localserver/
 made by Sebastian Rahlf, which lacks an FTP server.
