@@ -26,19 +26,36 @@ matrix:
       branches:
         only:
           - master
-
-      env: test doc creation
+      env: test-doc-creation
       sudo: false
       install:
         - python -m pip install -U -r requirements_dev.txt
         - python setup.py install
       script:
-        - cd docs; make html linkcheck
+        - cd docs; make html
       # Flags used here, not in `make html`:
       #  -n   Run in nit-picky mode. Currently, this generates warnings for all missing references.
       #  -W   Turn warnings into errors. This means that the build stops at the first warning and sphinx-build exits with exit status 1.
       after_success:
         - echo "done"
+
+    - python: 3.6
+        #taken from https://quick-sphinx-tutorial.readthedocs.io/en/latest/advanced.html
+      branches:
+          only:
+          - master
+      env: test-doc-links
+      sudo: false
+      install:
+      - python -m pip install -U -r requirements_dev.txt
+      - python setup.py install
+      script:
+      - cd docs; make linkcheck
+          # Flags used here, not in `make html`:
+      #  -n   Run in nit-picky mode. Currently, this generates warnings for all missing references.
+        #  -W   Turn warnings into errors. This means that the build stops at the first warning and sphinx-build exits with exit status 1.
+      after_success:
+      - echo "done"
 
     - language: generic
       python: 2.7
@@ -126,7 +143,7 @@ matrix:
       script: tox -e py37
 
     - python: 3.6
-      env: win_coverage
+      env: win-coverage
       install:
         - pip install git+https://github.com/Robpol86/appveyor-artifacts.git coveralls
       script:
@@ -134,6 +151,10 @@ matrix:
       after_success:
         - coveralls
         - coverage erase
+
+  allow_failures:
+#      this test is allowed to fail since it uses external resources
+    - env: test-doc-links
 
 install:
   - python -m pip install -U pip>=8.1.2

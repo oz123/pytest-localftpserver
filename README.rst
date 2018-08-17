@@ -19,13 +19,13 @@ PyTest FTP Server
         :target: https://pytest-ftp-server.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/oz123/pytest_localftpserver/shield.svg
-     :target: https://pyup.io/repos/github/oz123/pytest_localftpserver/
-     :alt: Updates
+.. image:: https://pyup.io/repos/github/oz123/pytest-localftpserver/shield.svg
+        :target: https://pyup.io/repos/github/oz123/pytest-localftpserver/
+        :alt: Updates
 
 .. image:: https://coveralls.io/repos/github/oz123/pytest-localftpserver/badge.svg
-     :target: https://coveralls.io/github/oz123/pytest-localftpserver
-     :alt: Coverage
+        :target: https://coveralls.io/github/oz123/pytest-localftpserver
+        :alt: Coverage
 
 
 A PyTest plugin which provides an FTP fixture for your tests
@@ -35,8 +35,8 @@ A PyTest plugin which provides an FTP fixture for your tests
 * Documentation: https://pytest-ftp-server.readthedocs.io.
 
 
-Usage:
-======
+Usage Quickstart:
+=================
 
   ``ftpserver``
   provides a threaded FTP server where you can upload files and test FTP
