@@ -47,20 +47,19 @@ install:
   - '%CMD_IN_ENV% python -m pip install -U pip setuptools wheel'
 
   # install tox
-  - '%CMD_IN_ENV% python -m pip install -U tox coverage codecov'
+  - '%CMD_IN_ENV% python -m pip install -U tox coverage'
 
 build: none
 
 test_script:
   # delete old .coverage file
   - coverage erase
-  - tox
+  - tox -e py{27,34,35,36,37}, env_var_coverage
 
 artifacts:
   - path: .coverage
 
 on_finish:
-  - codecov
   # Remove old or huge cache files to hopefully not exceed the 1GB cache limit.
   #
   # If the cache limit is reached, the cache will not be updated (of not even
