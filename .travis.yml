@@ -8,7 +8,6 @@ python:
   - 3.4
   - 3.5
   - 3.6
-  - 3.7-dev
 
 matrix:
   fast_finish: true
@@ -56,6 +55,12 @@ matrix:
         #  -W   Turn warnings into errors. This means that the build stops at the first warning and sphinx-build exits with exit status 1.
       after_success:
       - echo "done"
+
+    - language: python
+      sudo: required
+      dist: xenial
+      python: "3.7"
+      env: linux-py37
 
     - language: generic
       python: 2.7
