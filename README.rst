@@ -15,8 +15,8 @@ PyTest FTP Server
 .. image:: https://ci.appveyor.com/api/projects/status/github/oz123/pytest-localftpserver?svg=true
         :target: https://ci.appveyor.com/project/oz123/pytest-localftpserver/branch/master
 
-.. image:: https://readthedocs.org/projects/pytest-ftp-server/badge/?version=latest
-        :target: https://pytest-ftp-server.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/pytest-localftpserver/badge/?version=latest
+        :target: https://pytest-localftpserver.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 .. image:: https://pyup.io/repos/github/oz123/pytest-localftpserver/shield.svg
@@ -32,7 +32,7 @@ A PyTest plugin which provides an FTP fixture for your tests
 
 
 * Free software: MIT license
-* Documentation: https://pytest-ftp-server.readthedocs.io.
+* Documentation: https://pytest-localftpserver.readthedocs.io/en/latest/index.html
 
 
 Usage Quickstart:
