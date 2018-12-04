@@ -51,8 +51,7 @@ lint: ## check style with flake8
 	flake8 pytest_localftpserver tests
 
 test: ## run tests quickly with the default Python
-	py.test
-
+        tox -e py36
 
 test-all: ## run tests on every Python version with tox
 	tox
