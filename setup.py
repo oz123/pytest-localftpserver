@@ -20,7 +20,7 @@ test_requirements = [
 
 setup(
     name='pytest_localftpserver',
-    version='0.5.0',
+    version='0.5.1',
     description="A PyTest plugin which provides an FTP fixture for your tests",
     long_description=readme + '\n\n' + history,
     author="Oz Tiram",
@@ -35,10 +35,10 @@ setup(
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
-        'Operating System :: Linux',
-        'Operating System :: MacOS X',
+        'Operating System :: MacOS :: MacOS X',
         'Operating System :: Microsoft :: Windows',
-        'Operating System :: POSIX'
+        'Operating System :: POSIX :: Linux',
+        'Operating System :: POSIX',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         "Programming Language :: Python :: 2",
