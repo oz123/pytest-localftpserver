@@ -105,7 +105,7 @@ def check_files_by_ftpclient(ftpserver, tmpdir, files_on_server, path_iterable, 
         assert os.path.isfile(abs_file_path)
         assert file_path in files_on_server
         dirs, filename = os.path.split(file_path)
-        if dirs is not "":
+        if dirs != "":
             download_file = download_dir.mkdir(dirs).join(filename)
         else:
             download_file = download_dir.join(filename)
@@ -337,7 +337,7 @@ def test_get_file_paths(tmpdir, ftpserver, anon):
     files_on_server = []
     for dirs, filename in FILE_LIST:
         dir_path = os.path.abspath(os.path.join(base_path, dirs))
-        if dirs is not "":
+        if dirs != "":
             os.makedirs(dir_path)
         abs_file_path = os.path.join(dir_path, filename)
         file_path = "/".join([dirs, filename]).lstrip("/")
@@ -396,7 +396,7 @@ def test_get_file_contents(tmpdir, ftpserver, anon, file_rel_paths, style, read_
     files_on_server = []
     for dirs, filename in FILE_LIST:
         dir_path = os.path.abspath(os.path.join(base_path, dirs))
-        if dirs is not "":
+        if dirs != "":
             os.makedirs(dir_path)
         abs_file_path = os.path.join(dir_path, filename)
         file_path = "/".join([dirs, filename]).lstrip("/")
@@ -501,7 +501,7 @@ def test_put_files(tmpdir, ftpserver, use_dict, style, anon, overwrite,
     files_on_local = []
     local_dir = tmpdir.mkdir("local_dir")
     for dirs, filename in FILE_LIST:
-        if dirs is not "":
+        if dirs != "":
             test_file = local_dir.mkdir(dirs).join(filename)
         else:
             test_file = local_dir.join(filename)
