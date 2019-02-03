@@ -906,7 +906,7 @@ class BaseMPFTPServer(object):
                     dirs, filename = os.path.split(file_path_local["dest"])
                     dir_path = os.path.abspath(os.path.join(base_path, dirs))
                     # strip is needed in case dirs is " "
-                    if dirs.strip() is not "" and not os.path.isdir(dir_path):
+                    if dirs.strip() != "" and not os.path.isdir(dir_path):
                         os.makedirs(dir_path)
                     file_path_local = file_path_local["src"]
                     file_path = os.path.abspath(os.path.join(base_path, dir_path, filename))

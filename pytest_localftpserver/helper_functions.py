@@ -215,7 +215,7 @@ def arg_validator(func_locals, valid_var_dict, valid_var_overwrite=None,
                                  "{value_string}, the given value was "
                                  "{val}.".format(**msg_dict))
         # this is a convenience functionality, for implementing new functions
-        if not found_entry and dev_mode and key is not "self":
+        if not found_entry and dev_mode and key != "self":
             warn_msg = "`valid_var_list` in `{}` is missing an entry, " \
                        "where entry['name']=={}, this entry won't be " \
                        "validated.".format(implementation_func_name, key)
