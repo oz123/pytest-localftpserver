@@ -10,10 +10,18 @@ if "%SPHINXBUILD%" == "" (
 set SOURCEDIR=.
 set BUILDDIR=_build
 set API_TOCTREE_DIR=api
-set SPHINXPROJ=glotaran
+set SPHINXPROJ=pytest_localftpserver
 set SPHINXOPTS=-W
 
 if "%1" == "" goto help
+
+if "%1" == "clean_all" (
+	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
+	del /q /s %BUILDDIR%\*
+	for /d %%i in (%API_TOCTREE_DIR%\*) do rmdir /q /s %%i
+	del /q /s %API_TOCTREE_DIR%\*
+	goto end
+)
 
 %SPHINXBUILD% >NUL 2>NUL
 if errorlevel 9009 (
@@ -33,20 +41,6 @@ goto end
 
 :help
 %SPHINXBUILD% -M help %SOURCEDIR% %BUILDDIR% %SPHINXOPTS%
-
-
-if "%1" == "clean_all" (
-	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
-	del /q /s %BUILDDIR%\*
-	for /d %%i in (%API_TOCTREE_DIR%\*) do rmdir /q /s %%i
-	del /q /s %API_TOCTREE_DIR%\*
-	goto end
-)
-
-if "%1" == "api_docs" (
-    python generate_api_documentation.py
-	goto end
-)
 
 
 :end
