@@ -12,6 +12,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'pyftpdlib',
+    'pytest'
 ]
 
 test_requirements = [
