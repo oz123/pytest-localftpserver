@@ -21,40 +21,14 @@ matrix:
       env: TOXENV=env_var_coverage
 
     - python: 3.6
-      #taken from https://quick-sphinx-tutorial.readthedocs.io/en/latest/advanced.html
-      branches:
-        only:
-          - master
-      env: test-doc-creation
-      sudo: false
-      install:
-        - python -m pip install -U -r requirements_dev.txt
-        - python setup.py install
-      script:
-        - cd docs; make html
-      # Flags used here, not in `make html`:
-      #  -n   Run in nit-picky mode. Currently, this generates warnings for all missing references.
-      #  -W   Turn warnings into errors. This means that the build stops at the first warning and sphinx-build exits with exit status 1.
+      env: TOXENV=docs
       after_success:
         - echo "done"
 
     - python: 3.6
-        #taken from https://quick-sphinx-tutorial.readthedocs.io/en/latest/advanced.html
-      branches:
-          only:
-          - master
-      env: test-doc-links
-      sudo: false
-      install:
-      - python -m pip install -U -r requirements_dev.txt
-      - python setup.py install
-      script:
-      - cd docs; make linkcheck
-          # Flags used here, not in `make html`:
-      #  -n   Run in nit-picky mode. Currently, this generates warnings for all missing references.
-        #  -W   Turn warnings into errors. This means that the build stops at the first warning and sphinx-build exits with exit status 1.
+      env: TOXENV=docs-links
       after_success:
-      - echo "done"
+        - echo "done"
 
     - language: python
       sudo: required
@@ -159,7 +133,7 @@ matrix:
 
   allow_failures:
 #      this test is allowed to fail since it uses external resources
-    - env: test-doc-links
+    - env: TOXENV=docs-links
 
 install:
   - python -m pip install -U pip>=8.1.2
