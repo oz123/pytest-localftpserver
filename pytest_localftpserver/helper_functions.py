@@ -4,9 +4,19 @@ from __future__ import print_function, absolute_import
 
 from copy import deepcopy
 import logging
+import os
 import sys
 from traceback import print_tb
 import warnings
+
+
+def get_env_dict():
+    env_dict = {}
+    env_dict["username"] = os.getenv("FTP_USER", "fakeusername")
+    env_dict["password"] = os.getenv("FTP_PASS", "qweqwe")
+    env_dict["ftp_home"] = os.getenv("FTP_HOME", "")
+    env_dict["ftp_port"] = int(os.getenv("FTP_PORT", 0))
+    return env_dict
 
 
 def pretty_logger(heading, msg):

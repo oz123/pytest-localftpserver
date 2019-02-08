@@ -192,10 +192,7 @@ def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
 
 
 def test_ftpserver_class(ftpserver):
-    if plugin.USE_PROCESS:
-        assert isinstance(ftpserver, plugin.ProcessFTPServer)
-    else:
-        assert isinstance(ftpserver, plugin.ThreadFTPServer)
+    assert isinstance(ftpserver, plugin.FTPServer)
 
 
 @pytest.mark.parametrize("anon",
