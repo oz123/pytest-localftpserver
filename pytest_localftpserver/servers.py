@@ -7,7 +7,6 @@ from functools import wraps
 import multiprocessing
 import os
 import shutil
-import socket
 import sys
 from sys import excepthook as _excepthook
 import tempfile
@@ -15,13 +14,21 @@ import threading
 import warnings
 
 from pyftpdlib.authorizers import DummyAuthorizer
-from pyftpdlib.handlers import FTPHandler
+from pyftpdlib.handlers import FTPHandler, TLS_FTPHandler
 from pyftpdlib.servers import FTPServer
 
-from pytest_localftpserver.helper_functions import (arg_validator,
+from pytest_localftpserver.helper_functions import (get_socket,
+                                                    get_env_dict,
+                                                    arg_validator,
                                                     arg_validator_excepthook,
-                                                    pretty_logger)
+                                                    pretty_logger,
+                                                    DEFAULT_CERTFILE)
 
+
+if sys.platform.startswith('linux'):
+    USE_PROCESS = True
+else:
+    USE_PROCESS = False
 
 # uncomment the next line to log _option_validator for debugging
 # import logging
@@ -35,7 +42,8 @@ class SimpleFTPServer(FTPServer):
     https://github.com/Lukasa/requests-ftp/
     """
 
-    def __init__(self, username, password, ftp_home=None, ftp_port=0):
+    def __init__(self, username="fakeusername", password="qweqwe", ftp_home=None,
+                 ftp_port=0, ftp_port_TLS=0, use_TLS=False, certfile=DEFAULT_CERTFILE):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp(prefix="anon_root_")
         if not ftp_home:
@@ -51,16 +59,21 @@ class SimpleFTPServer(FTPServer):
                             perm='elradfmwM')
         authorizer.add_anonymous(self.anon_root)
 
-        handler = FTPHandler
+        if use_TLS:
+            handler = TLS_FTPHandler
+            handler.certfile = certfile
+            socket, self._ftp_port = get_socket(ftp_port_TLS)
+        else:
+            handler = FTPHandler
+            socket, self._ftp_port = get_socket(ftp_port)
+
+        self._uses_TLS = use_TLS
+
         handler.authorizer = authorizer
-        # Create a socket on any free port
-        self._ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self._ftp_socket.bind(('127.0.0.1', ftp_port))
-        self._ftp_port = self._ftp_socket.getsockname()[1]
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, self._ftp_socket, handler)
+        FTPServer.__init__(self, socket, handler)
 
     @property
     def anon_root(self):
@@ -124,7 +137,7 @@ class BaseMPFTPServer(object):
     The derived classes are ThreadFTPServer and ProcessFTPServer, which
     (depending on the OS) are the classes of the ftpserver instance.
     """
-    def __init__(self, username, password, ftp_home, ftp_port):
+    def __init__(self, use_TLS=False):
         """
 
         Parameters
@@ -138,8 +151,8 @@ class BaseMPFTPServer(object):
         ftp_port: int
             Desired port for the server to listen to.
         """
-        self._server = SimpleFTPServer(username, password,
-                                       ftp_home, ftp_port)
+        env_dict = get_env_dict()
+        self._server = SimpleFTPServer(use_TLS=use_TLS, **env_dict)
 
     @property
     def username(self):
@@ -175,6 +188,13 @@ class BaseMPFTPServer(object):
         Local path to FTP home for the anonymous user.
         """
         return self._server._anon_root
+
+    @property
+    def uses_TLS(self):
+        """
+        Weather or not the server uses TLS/SSL.
+        """
+        return self._server._uses_TLS
 
     def _option_validator(valid_var_overwrite=None,
                           strict_type_check=True,
@@ -385,10 +405,14 @@ class BaseMPFTPServer(object):
         # here else is used for a better branch coverage
         else:
             host = "localhost:"+str(self.server_port)
-            if anon:
-                return "ftp://"+host
+            if self.uses_TLS:
+                ftp_prefix = "ftpes"
             else:
-                return "ftp://"+self.username+":"+self.password+"@"+host
+                ftp_prefix = "ftp"
+            if anon:
+                return ftp_prefix+"://"+host
+            else:
+                return ftp_prefix+"://"+self.username+":"+self.password+"@"+host
 
     @_option_validator()
     def format_file_path(self, rel_file_path, style="rel_path", anon=False):
@@ -964,39 +988,44 @@ class BaseMPFTPServer(object):
         self.stop()
 
 
-class ThreadFTPServer(BaseMPFTPServer, threading.Thread):
+class ThreadFTPServer(BaseMPFTPServer):
     """
     Implementation of the server based on threading.Thread and BaseMPFTPServer
     (Windows and OSX).
     To learn about the functionality check out BaseMPFTPServer.
     """
-    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
-        # inheriting isn't done via super, since the strict order matters
-        threading.Thread.__init__(self, **kwargs)
-        BaseMPFTPServer.__init__(self, username, password,
-                                 ftp_home, ftp_port)
+    def __init__(self, use_TLS=False):
+        super(ThreadFTPServer, self).__init__(use_TLS=use_TLS)
+        # The server needs to run in a separate thread or it will block all tests
+        self.thread = threading.Thread(target=self._server.serve_forever)
+        # This is a must in order to clear used sockets
+        self.thread.deamon = True
 
-    def run(self):
-        self._server.serve_forever()
+    def start(self):
+        self.thread.start()
+
+    def stop(self):
+        self._server.stop()
+        self.thread.join()
 
 
-class ProcessFTPServer(BaseMPFTPServer, multiprocessing.Process):
+class ProcessFTPServer(BaseMPFTPServer):
     """
     Implementation of the server based on multiprocessing.Process and BaseMPFTPServer
     (Linux).
     To learn about the functionality check out BaseMPFTPServer.
     """
-    def __init__(self, username, password, ftp_home, ftp_port, **kwargs):
-        # inheriting isn't done via super, since the strict order matters
-        multiprocessing.Process.__init__(self, **kwargs)
-        BaseMPFTPServer.__init__(self, username, password,
-                                 ftp_home, ftp_port)
+    def __init__(self, use_TLS=False):
+        super(ProcessFTPServer, self).__init__(use_TLS=use_TLS)
+        # The server needs to run in a separate process or it will block all tests
+        self.process = multiprocessing.Process(target=self._server.serve_forever)
+        # This is a must in order to clear used sockets
+        self.process.deamon = True
 
-    def run(self):
-        # since the code run in a separate process can't be seen by
-        # coverage this line doesn't need to be covered
-        self._server.serve_forever()  # pragma: no cover
+    def start(self):
+        self.process.start()
 
     def stop(self):
         self._server.stop()
-        self.terminate()
+        self.process.join()
+        self.process.terminate()

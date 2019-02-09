@@ -11,7 +11,8 @@ with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
 requirements = [
-    'pyftpdlib',
+    'pyftpdlib>=1.2.0',
+    'PyOpenSSL',
     'pytest'
 ]
 
@@ -32,7 +33,7 @@ setup(
     install_requires=requirements,
     license="MIT license",
     zip_safe=False,
-    keywords='pytest_ftpserver',
+    keywords='pytest_localftpserver pytest fixture ftp server local',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
@@ -50,10 +51,11 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         "Framework :: Pytest",
+        'Topic :: Software Development :: Testing'
     ],
     test_suite='tests',
     tests_require=test_requirements,
     entry_points={
-                  'pytest11': ['ftpstub = pytest_localftpserver.plugin']
+                  'pytest11': ['localftpserver = pytest_localftpserver.plugin']
     },
 )

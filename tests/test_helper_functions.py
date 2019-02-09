@@ -3,9 +3,40 @@
 
 from collections import Iterable
 import logging
+import os
+import socket
+
 import pytest
 
-from pytest_localftpserver.helper_functions import arg_validator, pretty_logger
+from pytest_localftpserver.helper_functions import (get_env_dict,
+                                                    get_socket,
+                                                    arg_validator,
+                                                    pretty_logger,
+                                                    DEFAULT_CERTFILE)
+
+
+def test_get_env_dict():
+    result_dict = {}
+    result_dict["username"] = "fakeusername"
+    result_dict["password"] = "qweqwe"
+    result_dict["ftp_home"] = ""
+    result_dict["ftp_port"] = 0
+    result_dict["ftp_port_TLS"] = 0
+    result_dict["certfile"] = os.path.abspath(DEFAULT_CERTFILE)
+    env_dict = get_env_dict()
+    assert env_dict == result_dict
+
+
+def test_get_socket():
+    socket_obj, taken_port = get_socket()
+    assert isinstance(socket_obj, socket.socket)
+    assert isinstance(taken_port, int)
+    with pytest.warns(UserWarning, match=r"PYTEST_LOCALFTPSERVER: "
+                                         r"The desire port {} was not free, so the "
+                                         r"server will run at port \d+.".format(taken_port)):
+        socket_obj2, new_port = get_socket(taken_port)
+        assert isinstance(socket_obj2, socket.socket)
+        assert taken_port != new_port
 
 
 def test_arg_validator():

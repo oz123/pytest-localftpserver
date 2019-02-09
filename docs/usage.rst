@@ -229,15 +229,18 @@ You can either do that on a system level or use tools such as
 Configuration with pytest-env
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The configuration of pytest-env is done in the ``pytest.ini`` file.
-The following example configuration will use the username benz, the password erni1
-and the ftp port 31175::
+The following example configuration will use the username ``benz``, the password ``erni1``
+and the ftp port ``31175``. If a ::
 
     $ cat pytest.ini
     [pytest]
     env =
-        FTP_PORT=31175
         FTP_USER=benz
         FTP_PASS=erni1
+        FTP_PORT=31175
+        # only affects ftpserver_TLS
+        FTP_PORT_TLS = 31176
+        FTP_CERTFILE = ./tests/test_keycert.pem
 
 
 Configuration with Tox
@@ -245,12 +248,12 @@ Configuration with Tox
 
 The configuration of tox is done in the ``tox.ini`` file.
 The following example configuration will run the tests in the folder ``tests`` on
-python 2.7, 3.4, 3.5 and 3.6 and use the username benz, the password erni1,
-the tempfolder of of each virtual environment the tests are run in and the ftp port 31175::
+python 2.7, 3.4, 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
+the tempfolder of of each virtual environment the tests are run in and the ftp port ``31175``::
 
     $ cat tox.ini
     [tox]
-    envlist = py{27,34,35,36}
+    envlist = py{27,34,35,36,37}
 
     [testenv]
     setenv =
@@ -258,6 +261,9 @@ the tempfolder of of each virtual environment the tests are run in and the ftp p
         FTP_PASS = erni1
         FTP_HOME = {envtmpdir}
         FTP_PORT = 31175
+        # only affects ftpserver_TLS
+        FTP_PORT_TLS = 31176
+        FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
     commands =
         py.test tests
 
