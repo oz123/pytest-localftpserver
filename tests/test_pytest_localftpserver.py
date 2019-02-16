@@ -737,3 +737,10 @@ def test_ftp_stopped(ftpserver):
     # check if all temp folders got cleared properly
     assert not os.path.exists(local_anon_path)
     assert not os.path.exists(local_ftp_home)
+
+
+def test_fail_due_to_closed_module_scope(ftpserver):
+    """This test is just meant to confirm that the server is down on module scope"""
+    ftp = FTP()
+    with pytest.raises(Exception):
+        ftp.connect("localhost", port=ftpserver.server_port)

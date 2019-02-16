@@ -220,18 +220,6 @@ class FunctionalityWrapper(object):
         """
         return self._server._uses_TLS
 
-    def halt(self):
-        """
-
-        """
-        self._server.close()
-
-    def serve_forever(self):
-        """
-
-        """
-        self._server.serve_forever()
-
     def _option_validator(valid_var_overwrite=None,
                           strict_type_check=True,
                           dev_mode=False,
