@@ -9,6 +9,7 @@ import socket
 import pytest
 
 from pytest_localftpserver.helper_functions import (get_env_dict,
+                                                    get_scope,
                                                     get_socket,
                                                     arg_validator,
                                                     pretty_logger,
@@ -25,6 +26,22 @@ def test_get_env_dict():
     result_dict["certfile"] = os.path.abspath(DEFAULT_CERTFILE)
     env_dict = get_env_dict()
     assert env_dict == result_dict
+
+
+@pytest.mark.parametrize("env_var",
+                         ["function", "module", "session"])
+def test_get_scope(monkeypatch, env_var):
+    monkeypatch.setenv('FTP_FIXTURE_SCOPE', env_var)
+    assert get_scope() == env_var
+
+
+def test_get_scope_warn(monkeypatch):
+    monkeypatch.setenv('FTP_FIXTURE_SCOPE', "not_a_scope")
+    with pytest.warns(UserWarning, match=r"The scope 'not_a_scope', given by the environment "
+                                         r"variable 'FTP_FIXTURE_SCOPE' is not a valid scope, "
+                                         r"which is why the default scope 'module'was used. "
+                                         r"Valid scopes are 'function', 'module' and 'session'."):
+        get_scope()
 
 
 def test_get_socket():

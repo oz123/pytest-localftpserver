@@ -19,7 +19,7 @@ import sys
 import pytest
 import wget
 
-from pytest_localftpserver.plugin import FTPServer
+from pytest_localftpserver.plugin import PytestLocalFTPServer
 from pytest_localftpserver.servers import USE_PROCESS
 from pytest_localftpserver.helper_functions import DEFAULT_CERTFILE
 
@@ -227,7 +227,7 @@ def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
 
 
 def test_ftpserver_class(ftpserver):
-    assert isinstance(ftpserver, FTPServer)
+    assert isinstance(ftpserver, PytestLocalFTPServer)
     assert ftpserver.uses_TLS is False
 
 

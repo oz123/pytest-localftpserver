@@ -4,21 +4,17 @@ from __future__ import print_function, absolute_import
 
 import pytest
 
-from .servers import USE_PROCESS
-
-if USE_PROCESS:
-    from .servers import ProcessFTPServer as FTPServer
-else:
-    from .servers import ThreadFTPServer as FTPServer
-
-# from .servers import ProcessFTPServer as FTPServer
+from .servers import PytestLocalFTPServer
+from .helper_functions import get_scope
 
 # uncomment the next line to log _option_validator for debugging
 # import logging
 # logging.basicConfig(filename='option_validator.log', level=logging.INFO)
 
+FIXTURE_SCOPE = get_scope()
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope=FIXTURE_SCOPE)
 def ftpserver(request):
     """The returned ``ftpsever`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` running on localhost.
@@ -35,14 +31,12 @@ def ftpserver(request):
         `FunctionalityWrapper` holds all functionality, let's pretend that it is
         `FunctionalityWrapper`.
     """
-    server = FTPServer()
-    # This is a must in order to clear used sockets
-    server.start()
+    server = PytestLocalFTPServer()
     request.addfinalizer(server.stop)
     return server
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope=FIXTURE_SCOPE)
 def ftpserver_TLS(request):
     """The returned ``ftpsever_TSL`` provides a threaded instance of
     ``pyftpdlib.servers.FTPServer`` using TSL and running on localhost.
@@ -59,8 +53,6 @@ def ftpserver_TLS(request):
         `FunctionalityWrapper` holds all functionality, let's pretend that it is
         `FunctionalityWrapper`.
     """
-    server = FTPServer(use_TLS=True)
-    # This is a must in order to clear used sockets
-    server.start()
+    server = PytestLocalFTPServer(use_TLS=True)
     request.addfinalizer(server.stop)
     return server

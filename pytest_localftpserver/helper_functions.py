@@ -23,7 +23,7 @@ def get_env_dict():
     -------
     env_dict: dict
         Dict containing the environment variables used to configure
-        the ftp fixtures
+        the ftp fixtures or its default values.
     """
     env_dict = {}
     env_dict["username"] = os.getenv("FTP_USER", "fakeusername")
@@ -34,6 +34,27 @@ def get_env_dict():
     env_dict["certfile"] = os.path.abspath(os.getenv("FTP_CERTFILE",
                                                      DEFAULT_CERTFILE))
     return env_dict
+
+
+def get_scope():
+    """
+    Retrieves the environment variables used to configure
+    the ftpserver fixtures
+
+    Returns
+    -------
+    scope: {'function', 'module', 'session'}: default 'module'
+        Scope at which the fixture should be.
+
+    """
+    scope = os.getenv("FTP_FIXTURE_SCOPE", "module")
+    if scope not in ["function", "module", "session"]:
+        warnings.warn("The scope '{}', given by the environment variable 'FTP_FIXTURE_SCOPE' "
+                      "is not a valid scope, which is why the default scope 'module'was used. "
+                      "Valid scopes are 'function', 'module' and 'session'.".format(scope),
+                      UserWarning)
+        scope = "module"
+    return scope
 
 
 def get_socket(desired_port=0):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import os
+
 from pytest_localftpserver.helper_functions import get_env_dict
 
 

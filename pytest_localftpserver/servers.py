@@ -25,11 +25,6 @@ from pytest_localftpserver.helper_functions import (get_socket,
                                                     DEFAULT_CERTFILE)
 
 
-if sys.platform.startswith('linux'):
-    USE_PROCESS = True
-else:
-    USE_PROCESS = False
-
 # uncomment the next line to log _option_validator for debugging
 # import logging
 # logging.basicConfig(filename='option_validator.log', level=logging.INFO)
@@ -156,20 +151,27 @@ class FunctionalityWrapper(object):
     Notes
     -----
 
-    For custom configuration it uses the following environment variables:
+    For custom configuration the following environment variables can be used:
 
-    FTP_USER: str
-        Name of the registered user.
-    FTP_PASS: str
-        Password of the registered user.
-    FTP_HOME: str
-        Local path to FTP home for the registered user.
-    FTP_PORT: int
-        Desired port for the unencrypted server to listen to.
-    FTP_PORT_TLS: int
-        Desired port for the encrypted server to listen to.
-    FTP_CERTFILE: str
-        Path to the certificate used by the encrypted server.
+    General:
+
+        FTP_USER: str
+            Name of the registered user.
+        FTP_PASS: str
+            Password of the registered user.
+        FTP_HOME: str
+            Local path to FTP home for the registered user.
+        FTP_PORT: int
+            Desired port for the unencrypted server to listen to.
+        FTP_FIXTURE_SCOPE: {'function', 'module', 'session'}: default 'module'
+            Scope the fixture will be in.
+
+    TLS only:
+
+        FTP_PORT_TLS: int
+            Desired port for the encrypted server to listen to.
+        FTP_CERTFILE: str
+            Path to the certificate used by the encrypted server.
 
     """
     def __init__(self, use_TLS=False):
@@ -217,6 +219,18 @@ class FunctionalityWrapper(object):
         Weather or not the server uses TLS/SSL encryption.
         """
         return self._server._uses_TLS
+
+    def halt(self):
+        """
+
+        """
+        self._server.close()
+
+    def serve_forever(self):
+        """
+
+        """
+        self._server.serve_forever()
 
     def _option_validator(valid_var_overwrite=None,
                           strict_type_check=True,
@@ -1018,8 +1032,6 @@ class ThreadFTPServer(FunctionalityWrapper):
     """
     def __init__(self, use_TLS=False):
         super(ThreadFTPServer, self).__init__(use_TLS=use_TLS)
-
-    def start(self):
         # The server needs to run in a separate thread or it will block all tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1039,8 +1051,6 @@ class ProcessFTPServer(FunctionalityWrapper):
     """
     def __init__(self, use_TLS=False):
         super(ProcessFTPServer, self).__init__(use_TLS=use_TLS)
-
-    def start(self):
         # The server needs to run in a separate process or it will block all tests
         self.process = multiprocessing.Process(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1050,3 +1060,11 @@ class ProcessFTPServer(FunctionalityWrapper):
     def stop(self):
         super(ProcessFTPServer, self).stop()
         self.process.terminate()
+
+
+if sys.platform.startswith('linux'):
+    USE_PROCESS = True
+    PytestLocalFTPServer = ProcessFTPServer
+else:
+    USE_PROCESS = False
+    PytestLocalFTPServer = ThreadFTPServer

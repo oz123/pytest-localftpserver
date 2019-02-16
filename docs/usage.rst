@@ -238,6 +238,7 @@ and the ftp port ``31175``. If a ::
         FTP_USER=benz
         FTP_PASS=erni1
         FTP_PORT=31175
+        FTP_FIXTURE_SCOPE=function
         # only affects ftpserver_TLS
         FTP_PORT_TLS = 31176
         FTP_CERTFILE = ./tests/test_keycert.pem
@@ -261,6 +262,7 @@ the tempfolder of of each virtual environment the tests are run in and the ftp p
         FTP_PASS = erni1
         FTP_HOME = {envtmpdir}
         FTP_PORT = 31175
+        FTP_FIXTURE_SCOPE=function
         # only affects ftpserver_TLS
         FTP_PORT_TLS = 31176
         FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
