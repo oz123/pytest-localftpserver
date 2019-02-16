@@ -2,7 +2,7 @@
 API Documentation
 =================
 
-This is the detailed documentation of ``BaseMPFTPServer``, which
+This is the detailed documentation of ``FunctionalityWrapper``, which
 holds all the functionality you gain by ``PyTest local FTP Server``.
 
 .. currentmodule:: pytest_localftpserver.servers
@@ -11,4 +11,4 @@ holds all the functionality you gain by ``PyTest local FTP Server``.
    :nosignatures:
    :toctree: api/
 
-   BaseMPFTPServer
+   FunctionalityWrapper

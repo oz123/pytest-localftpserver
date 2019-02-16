@@ -37,9 +37,20 @@ else:
 
 class SimpleFTPServer(FTPServer):
     """
-    Starts a simple FTP server on a random free port.
+    Starts a simple FTP server.
 
     https://github.com/Lukasa/requests-ftp/
+
+    Parameters
+    ----------
+    username: str
+        Name of the registered user.
+    password: str
+        Password of the registered user.
+    ftp_home: str
+        Local path to FTP home for the registered user.
+    ftp_port: int
+        Desired port for the server to listen to.
     """
 
     def __init__(self, username="fakeusername", password="qweqwe", ftp_home=None,
@@ -131,26 +142,37 @@ class SimpleFTPServer(FTPServer):
                 os.makedirs(self.ftp_home)
 
 
-class BaseMPFTPServer(object):
+class FunctionalityWrapper(object):
     """
     Baseclass which holds the functionality of ftpserver.
     The derived classes are ThreadFTPServer and ProcessFTPServer, which
     (depending on the OS) are the classes of the ftpserver instance.
+
+    Parameters
+    ----------
+    use_TLS: bool
+        Weather  or not to use TLS/SSL encryption.
+
+    Notes
+    -----
+
+    For custom configuration it uses the following environment variables:
+
+    FTP_USER: str
+        Name of the registered user.
+    FTP_PASS: str
+        Password of the registered user.
+    FTP_HOME: str
+        Local path to FTP home for the registered user.
+    FTP_PORT: int
+        Desired port for the unencrypted server to listen to.
+    FTP_PORT_TLS: int
+        Desired port for the encrypted server to listen to.
+    FTP_CERTFILE: str
+        Path to the certificate used by the encrypted server.
+
     """
     def __init__(self, use_TLS=False):
-        """
-
-        Parameters
-        ----------
-        username: str
-            Name of the registered user.
-        password: str
-            Password of the registered user.
-        ftp_home: str
-            Local path to FTP home for the registered user.
-        ftp_port: int
-            Desired port for the server to listen to.
-        """
         env_dict = get_env_dict()
         self._server = SimpleFTPServer(use_TLS=use_TLS, **env_dict)
 
@@ -192,7 +214,7 @@ class BaseMPFTPServer(object):
     @property
     def uses_TLS(self):
         """
-        Weather or not the server uses TLS/SSL.
+        Weather or not the server uses TLS/SSL encryption.
         """
         return self._server._uses_TLS
 
@@ -831,11 +853,11 @@ class BaseMPFTPServer(object):
 
         ValueError
             If `files_on_local` is/contains an invalid filepath.
-        TypeError
+        ValueError
             If the value of `style` is not 'rel_path' or 'url'
-        TypeError
+        ValueError
             If the value of `return_paths` is not 'all', 'input' or 'new'
-        TypeError
+        ValueError
             If the value of `read_mode` is not 'r' or 'rb'
 
         KeyError
@@ -988,44 +1010,43 @@ class BaseMPFTPServer(object):
         self.stop()
 
 
-class ThreadFTPServer(BaseMPFTPServer):
+class ThreadFTPServer(FunctionalityWrapper):
     """
-    Implementation of the server based on threading.Thread and BaseMPFTPServer
+    Implementation of the server based on FunctionalityWrapper for
     (Windows and OSX).
     To learn about the functionality check out BaseMPFTPServer.
     """
     def __init__(self, use_TLS=False):
         super(ThreadFTPServer, self).__init__(use_TLS=use_TLS)
+
+    def start(self):
         # The server needs to run in a separate thread or it will block all tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
         self.thread.deamon = True
-
-    def start(self):
         self.thread.start()
 
     def stop(self):
-        self._server.stop()
+        super(ThreadFTPServer, self).stop()
         self.thread.join()
 
 
-class ProcessFTPServer(BaseMPFTPServer):
+class ProcessFTPServer(FunctionalityWrapper):
     """
-    Implementation of the server based on multiprocessing.Process and BaseMPFTPServer
+    Implementation of the server based on FunctionalityWrapper for
     (Linux).
     To learn about the functionality check out BaseMPFTPServer.
     """
     def __init__(self, use_TLS=False):
         super(ProcessFTPServer, self).__init__(use_TLS=use_TLS)
+
+    def start(self):
         # The server needs to run in a separate process or it will block all tests
         self.process = multiprocessing.Process(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
         self.process.deamon = True
-
-    def start(self):
         self.process.start()
 
     def stop(self):
-        self._server.stop()
-        self.process.join()
+        super(ProcessFTPServer, self).stop()
         self.process.terminate()

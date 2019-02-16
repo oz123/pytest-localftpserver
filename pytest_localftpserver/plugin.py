@@ -28,12 +28,12 @@ def ftpserver(request):
 
     Yields
     ------
-    ftpserver: BaseMPFTPServer
-        The type of `ftpserver` isn't actually `BaseMPFTPServer`,
+    ftpserver: FunctionalityWrapper
+        The type of `ftpserver` isn't actually `FunctionalityWrapper`,
         but a subclass with `threading.Thread` or `multiprocessing.Process`
         depending on the OS. But for autocomplete sake and since
-        `BaseMPFTPServer` holds all functionality, let's pretend that it is
-        `BaseMPFTPServer`.
+        `FunctionalityWrapper` holds all functionality, let's pretend that it is
+        `FunctionalityWrapper`.
     """
     server = FTPServer()
     # This is a must in order to clear used sockets
@@ -52,12 +52,12 @@ def ftpserver_TLS(request):
 
     Yields
     ------
-    ftpserver: BaseMPFTPServer
-        The type of `ftpsever_TSL` isn't actually `BaseMPFTPServer`,
+    ftpserver: FunctionalityWrapper
+        The type of `ftpsever_TSL` isn't actually `FunctionalityWrapper`,
         but a subclass with `threading.Thread` or `multiprocessing.Process`
         depending on the OS. But for autocomplete sake and since
-        `BaseMPFTPServer` holds all functionality, let's pretend that it is
-        `BaseMPFTPServer`.
+        `FunctionalityWrapper` holds all functionality, let's pretend that it is
+        `FunctionalityWrapper`.
     """
     server = FTPServer(use_TLS=True)
     # This is a must in order to clear used sockets
