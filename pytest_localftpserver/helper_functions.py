@@ -10,11 +10,21 @@ import sys
 from traceback import print_tb
 import warnings
 
+from ssl import SSLContext, SSLError
+try:
+    from ssl import PROTOCOL_TLS
+except Exception:
+    from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
+
 DEFAULT_CERTFILE = os.path.join(os.path.dirname(__file__),
                                 "default_keycert.pem")
 
 
-def get_env_dict():
+class InvalidCertificateError(Exception):
+    pass
+
+
+def get_env_dict(use_TLS=False):
     """
     Retrieves the environment variables used to configure
     the ftpserver fixtures
@@ -28,9 +38,13 @@ def get_env_dict():
     env_dict = {}
     env_dict["username"] = os.getenv("FTP_USER", "fakeusername")
     env_dict["password"] = os.getenv("FTP_PASS", "qweqwe")
-    env_dict["ftp_home"] = os.getenv("FTP_HOME", "")
-    env_dict["ftp_port"] = int(os.getenv("FTP_PORT", 0))
-    env_dict["ftp_port_TLS"] = int(os.getenv("FTP_PORT_TLS", 0))
+    if use_TLS:
+        env_dict["ftp_home"] = os.getenv("FTP_HOME_TLS", "")
+        env_dict["ftp_port"] = int(os.getenv("FTP_PORT_TLS", 0))
+    else:
+        env_dict["ftp_home"] = os.getenv("FTP_HOME", "")
+        env_dict["ftp_port"] = int(os.getenv("FTP_PORT", 0))
+
     env_dict["certfile"] = os.path.abspath(os.getenv("FTP_CERTFILE",
                                                      DEFAULT_CERTFILE))
     return env_dict
@@ -55,6 +69,32 @@ def get_scope():
                       UserWarning)
         scope = "module"
     return scope
+
+
+def validate_cert_file(cert_file):
+    """
+
+    Parameters
+    ----------
+    cert_file: str
+        Path to the certfile to be checked.
+
+    Raises
+    ------
+
+    InvalidCertificateError
+        If the certificate is not valid.
+
+    """
+    cert_file = os.path.abspath(cert_file)
+    try:
+        context = SSLContext(PROTOCOL_TLS)
+        context.load_cert_chain(cert_file)
+    except SSLError:
+        raise InvalidCertificateError("The certificate {}, you tried to use is not valid. "
+                                      "Please make sure to use a working certificate or "
+                                      "leave it unconfigured to use the default certificate."
+                                      "".format(cert_file))
 
 
 def get_socket(desired_port=0):

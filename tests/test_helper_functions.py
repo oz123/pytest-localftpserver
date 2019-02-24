@@ -22,7 +22,6 @@ def test_get_env_dict():
     result_dict["password"] = "qweqwe"
     result_dict["ftp_home"] = ""
     result_dict["ftp_port"] = 0
-    result_dict["ftp_port_TLS"] = 0
     result_dict["certfile"] = os.path.abspath(DEFAULT_CERTFILE)
     env_dict = get_env_dict()
     assert env_dict == result_dict

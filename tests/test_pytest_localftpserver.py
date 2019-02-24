@@ -223,6 +223,32 @@ def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
         assert content_dict["content"] == file_content
 
 
+def run_ftp_stopped_test(ftpserver_fixture):
+    """
+    Tests if the Server is unreachable after shutdown, by checking if a client that
+    tries to connect raises an exception.
+
+    Parameters
+    ----------
+    ftpserver_fixture: PytestLocalFTPServer
+
+    """
+    ftpserver_fixture.stop()
+    ftp = FTP()
+
+    if PYTHON3:
+        if USE_PROCESS:
+            with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
+                ftp.connect("localhost", port=ftpserver_fixture.server_port)
+        else:
+            with pytest.raises(OSError):
+                ftp.connect("localhost", port=ftpserver_fixture.server_port)
+    else:
+        # python2.7 raises a different error than python3
+        with pytest.raises(socket.error):
+            ftp.connect("localhost", port=ftpserver_fixture.server_port)
+
+
 # ACTUAL TESTS
 
 
@@ -720,20 +746,7 @@ def test_option_validator_logging(caplog, ftpserver):
 def test_ftp_stopped(ftpserver):
     local_anon_path = ftpserver.get_local_base_path(anon=True)
     local_ftp_home = ftpserver.get_local_base_path(anon=False)
-    ftpserver.stop()
-    ftp = FTP()
-
-    if PYTHON3:
-        if USE_PROCESS:
-            with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
-                ftp.connect("localhost", port=ftpserver.server_port)
-        else:
-            with pytest.raises(OSError):
-                ftp.connect("localhost", port=ftpserver.server_port)
-    else:
-        # python2.7 raises a different error than python3
-        with pytest.raises(socket.error):
-            ftp.connect("localhost", port=ftpserver.server_port)
+    run_ftp_stopped_test(ftpserver)
     # check if all temp folders got cleared properly
     assert not os.path.exists(local_anon_path)
     assert not os.path.exists(local_ftp_home)

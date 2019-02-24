@@ -19,6 +19,12 @@ from .test_pytest_localftpserver import (ftp_login,
                                          close_client,
                                          FILE_LIST)
 
+from pytest_localftpserver.servers import (SimpleFTPServer,
+                                           WrongFixtureError,
+                                           DEFAULT_CERTFILE)
+
+from pytest_localftpserver.helper_functions import InvalidCertificateError
+
 
 def test_is_TLS(ftpserver_TLS):
     assert ftpserver_TLS.uses_TLS is True
@@ -72,7 +78,7 @@ def test_file_upload_anon(ftpserver_TLS):
 
 
 @pytest.mark.parametrize("anon",
-                         [False])
+                         [False, True])
 def test_get_file_paths(tmpdir, ftpserver_TLS, anon):
     # makes sure to start with clean temp dirs
     ftpserver_TLS.reset_tmp_dirs()
@@ -94,3 +100,53 @@ def test_get_file_paths(tmpdir, ftpserver_TLS, anon):
     # and native ftp client
     check_files_by_ftpclient(ftpserver_TLS, tmpdir, files_on_server, path_iterable,
                              anon, use_TLS=True)
+
+
+@pytest.mark.parametrize("style, read_mode", [
+    ("path", "r"),
+    ("content", "r"),
+    ("content", "rb")
+])
+def test_ftpserver_TLS_get_cert(ftpserver_TLS, style, read_mode):
+    result = ftpserver_TLS.get_cert(style=style, read_mode=read_mode)
+    if style == "path":
+        assert result == DEFAULT_CERTFILE
+    else:
+        with open(DEFAULT_CERTFILE, read_mode) as certfile:
+            assert result == certfile.read()
+
+
+def test_ftpserver_get_cert_exceptions(ftpserver, ftpserver_TLS):
+    with pytest.raises(WrongFixtureError,
+                       match=r"The fixture ftpserver isn't using TLS, and thus"
+                             r"has no certificate. Use ftpserver_TLS instead."):
+        ftpserver.get_cert()
+
+    # type errors
+    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
+                                        "``str``, the type given type was "
+                                        "``bool``."):
+        ftpserver.get_cert(style=True)
+
+    with pytest.raises(TypeError, match="The Argument `read_mode` needs to be of type "
+                                        "``str``, the type given type was "
+                                        "``bool``."):
+        ftpserver.get_cert(read_mode=True)
+
+    # value errors
+    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
+                                         "'path' or 'content', the given value was "
+                                         "'dict'."):
+        list(ftpserver.get_cert(style="dict"))
+
+    with pytest.raises(ValueError, match="The Argument `read_mode` needs to be of value "
+                                         "'r' or 'rb', the given value was "
+                                         "'invalid_option'."):
+        list(ftpserver.get_cert(read_mode="invalid_option"))
+
+
+def test_wrong_cert_exception():
+    wrong_cert = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                              "not_a_valid_cert.pem"))
+    with pytest.raises(InvalidCertificateError):
+        SimpleFTPServer(use_TLS=True, certfile=wrong_cert)

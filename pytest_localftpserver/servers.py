@@ -16,10 +16,10 @@ import warnings
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler, TLS_FTPHandler
 from pyftpdlib.servers import FTPServer
-import OpenSSL
 
 from pytest_localftpserver.helper_functions import (get_socket,
                                                     get_env_dict,
+                                                    validate_cert_file,
                                                     arg_validator,
                                                     arg_validator_excepthook,
                                                     pretty_logger,
@@ -29,6 +29,10 @@ from pytest_localftpserver.helper_functions import (get_socket,
 # uncomment the next line to log _option_validator for debugging
 # import logging
 # logging.basicConfig(filename='option_validator.log', level=logging.INFO)
+
+
+class WrongFixtureError(Exception):
+    pass
 
 
 class SimpleFTPServer(FTPServer):
@@ -65,29 +69,24 @@ class SimpleFTPServer(FTPServer):
         authorizer.add_user(self.username, self.password, self._ftp_home,
                             perm='elradfmwM')
         authorizer.add_anonymous(self._anon_root)
+
+        self._uses_TLS = use_TLS
         self._cert_path = certfile
 
         if use_TLS:
             handler = TLS_FTPHandler
             handler.certfile = certfile
-            socket, self._ftp_port = get_socket(ftp_port)
+            validate_cert_file(certfile)
         else:
             handler = FTPHandler
-            socket, self._ftp_port = get_socket(ftp_port)
 
-        self._uses_TLS = use_TLS
+        socket, self._ftp_port = get_socket(ftp_port)
 
         handler.authorizer = authorizer
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        try:
-            FTPServer.__init__(self, socket, handler)
-        except OpenSSL.SSL.Error:
-            raise Exception()
-
-    def __del__(self):
-        self.stop()
+        FTPServer.__init__(self, socket, handler)
 
     def stop(self):
         """
@@ -209,7 +208,7 @@ class FunctionalityWrapper(object):
     @property
     def cert_path(self):
         """
-        Path to the used certificate File
+        Path to the used certificate File.
         """
         return self._server._cert_path
 
@@ -984,6 +983,68 @@ class FunctionalityWrapper(object):
         else:
             return self.get_file_contents(style=style, anon=anon,
                                           read_mode=read_mode)
+
+    @_option_validator(
+        valid_var_overwrite={
+            "style":
+                {"valid_values": ["path", "content"],
+                 'valid_types': [str]}
+        })
+    def get_cert(self, style="path", read_mode="r"):
+        """
+        Returns the path to the used certificate or its content as string or bytes.
+
+        Parameters
+        ----------
+        style: {'path', 'content'}, default 'path'
+            List of filepaths/content dicts in server_home/anon_root
+
+        read_mode: {'r', 'rb'}, default 'r'
+            This only applies if `style` is 'content'.
+            Mode in which files should be read (see ``open("filepath", read_mode)`` )
+
+        Returns
+        -------
+        cert: str
+            Path to or content of the used certificate
+
+        Raises
+        ------
+        TypeError
+            If `style` is not a ``str``
+        TypeError
+            If `read_mode` is not a ``str``
+
+        ValueError
+            If the value of `style` is not 'path' or 'content'
+        ValueError
+            If the value of `read_mode` is not 'r' or 'rb'
+
+        WrongFixtureError
+            If used on ftpserver fixture, instead of ftpserver_TLS fixture.
+
+        Examples
+        --------
+
+        >>> ftpserver_TLS.get_cert()
+        "/home/certs/TLS_cert.pem"
+
+        >>> ftpserver_TLS.get_cert(style="content")
+        "-----BEGIN RSA PRIVATE KEY-----\\nMIICXw..."
+
+        >>> ftpserver_TLS.get_cert(style="content", read_mode="rb")
+        b"-----BEGIN RSA PRIVATE KEY-----\\nMIICXw..."
+
+        """
+        if self.uses_TLS:
+            if style == "path":
+                return os.path.abspath(self._server._cert_path)
+            else:
+                with open(self.cert_path, read_mode) as certfile:
+                    return certfile.read()
+        else:
+            raise WrongFixtureError("The fixture ftpserver isn't using TLS, and thus"
+                                    "has no certificate. Use ftpserver_TLS instead.")
 
     def stop(self):
         """
