@@ -16,6 +16,7 @@ import warnings
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler, TLS_FTPHandler
 from pyftpdlib.servers import FTPServer
+import OpenSSL
 
 from pytest_localftpserver.helper_functions import (get_socket,
                                                     get_env_dict,
@@ -49,7 +50,7 @@ class SimpleFTPServer(FTPServer):
     """
 
     def __init__(self, username="fakeusername", password="qweqwe", ftp_home=None,
-                 ftp_port=0, ftp_port_TLS=0, use_TLS=False, certfile=DEFAULT_CERTFILE):
+                 ftp_port=0, use_TLS=False, certfile=DEFAULT_CERTFILE):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp(prefix="anon_root_")
         if not ftp_home:
@@ -61,14 +62,15 @@ class SimpleFTPServer(FTPServer):
         self.username = username
         self.password = password
         authorizer = DummyAuthorizer()
-        authorizer.add_user(self.username, self.password, self.ftp_home,
+        authorizer.add_user(self.username, self.password, self._ftp_home,
                             perm='elradfmwM')
-        authorizer.add_anonymous(self.anon_root)
+        authorizer.add_anonymous(self._anon_root)
+        self._cert_path = certfile
 
         if use_TLS:
             handler = TLS_FTPHandler
             handler.certfile = certfile
-            socket, self._ftp_port = get_socket(ftp_port_TLS)
+            socket, self._ftp_port = get_socket(ftp_port)
         else:
             handler = FTPHandler
             socket, self._ftp_port = get_socket(ftp_port)
@@ -79,28 +81,10 @@ class SimpleFTPServer(FTPServer):
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, socket, handler)
-
-    @property
-    def anon_root(self):
-        """
-        Home directory for the anonymous user
-        """
-        return self._anon_root
-
-    @property
-    def ftp_home(self):
-        """
-        FTP home for the ftp_user
-        """
-        return self._ftp_home
-
-    @property
-    def ftp_port(self):
-        """
-        Port the server is running on
-        """
-        return self._ftp_port
+        try:
+            FTPServer.__init__(self, socket, handler)
+        except OpenSSL.SSL.Error:
+            raise Exception()
 
     def __del__(self):
         self.stop()
@@ -116,9 +100,9 @@ class SimpleFTPServer(FTPServer):
         """
         Clears all temp files generated on the FTP server
         """
-        shutil.rmtree(self.anon_root, ignore_errors=True)
+        shutil.rmtree(self._anon_root, ignore_errors=True)
         if self.temp_ftp_home:
-            shutil.rmtree(self.ftp_home, ignore_errors=True)
+            shutil.rmtree(self._ftp_home, ignore_errors=True)
 
     def reset_tmp_dirs(self):
         """
@@ -130,11 +114,11 @@ class SimpleFTPServer(FTPServer):
         self.clear_tmp_dirs()
         # checking if the folder still exists prevents an error
         # being raised by os.makedirs
-        if not os.path.exists(self.anon_root):  # pragma: no branch
-            os.makedirs(self.anon_root)
+        if not os.path.exists(self._anon_root):  # pragma: no branch
+            os.makedirs(self._anon_root)
         if self.temp_ftp_home:  # pragma: no branch
-            if not os.path.exists(self.ftp_home):  # pragma: no branch
-                os.makedirs(self.ftp_home)
+            if not os.path.exists(self._ftp_home):  # pragma: no branch
+                os.makedirs(self._ftp_home)
 
 
 class FunctionalityWrapper(object):
@@ -168,6 +152,8 @@ class FunctionalityWrapper(object):
 
     TLS only:
 
+        FTP_HOME_TLS = str
+            Local path to FTP home for the registered user of the encrypted server.
         FTP_PORT_TLS: int
             Desired port for the encrypted server to listen to.
         FTP_CERTFILE: str
@@ -175,7 +161,7 @@ class FunctionalityWrapper(object):
 
     """
     def __init__(self, use_TLS=False):
-        env_dict = get_env_dict()
+        env_dict = get_env_dict(use_TLS=use_TLS)
         self._server = SimpleFTPServer(use_TLS=use_TLS, **env_dict)
 
     @property
@@ -197,14 +183,14 @@ class FunctionalityWrapper(object):
         """
         Port the server is running on.
         """
-        return self._server.ftp_port
+        return self._server._ftp_port
 
     @property
     def server_home(self):
         """
         Local path to FTP home for the registered user.
         """
-        return self._server.ftp_home
+        return self._server._ftp_home
 
     @property
     def anon_root(self):
@@ -219,6 +205,13 @@ class FunctionalityWrapper(object):
         Weather or not the server uses TLS/SSL encryption.
         """
         return self._server._uses_TLS
+
+    @property
+    def cert_path(self):
+        """
+        Path to the used certificate File
+        """
+        return self._server._cert_path
 
     def _option_validator(valid_var_overwrite=None,
                           strict_type_check=True,
