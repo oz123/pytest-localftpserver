@@ -7,7 +7,7 @@ your pytest test functions. Note that you can't use fixtures outside of function
 need to pass them as arguments.
 
 Basic usage
------------
+===========
 
 A basic example of using `pytest_localftpserver` would be, if you wanted to test code,
 which uploads a file to a FTP-server.
@@ -53,8 +53,61 @@ An other common use case would be retrieving a file from a FTP-server.
             assert original.read() == downloaded.read()
 
 
+Login with the TLS server
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Since Python 2 and 3, as well as different versions of python 3 differ in their implementation of the
+client ``FTP_TLS`` and/or ssl protocol/context, we provide you with an example which works on
+python 2.7, 3.4, 3.5 3.6 and 3.7
+(note that, this example utilizes methods of the the high-level interface, which are  explained in
+:ref:`get_login_data` and :ref:`get_file_contents`).
+
+The below example test logs into the TLS ftpserver, creates the file ``testfile.txt``, with content 'test text' and
+checks if it was written properly.
+
+.. code-block:: python
+
+    import sys
+    from ftplib import FTP_TLS
+
+    if sys.version_info[0] == 3:
+        PYTHON3 = True
+    else:
+        PYTHON3 = False
+
+    if PYTHON3:
+        from ssl import SSLContext
+        try:
+            from ssl import PROTOCOL_TLS
+        except Exception:
+            from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
+
+
+    def test_TLS_login(ftpserver_TLS):
+        if PYTHON3:
+            ssl_context = SSLContext(PROTOCOL_TLS)
+            ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
+            ftp = FTP_TLS(context=ssl_context)
+        else:
+            ftp = FTP_TLS(certfile=DEFAULT_CERTFILE)
+
+        login_dict = ftpserver_TLS.get_login_data()
+        ftp.connect(login_dict["host"], login_dict["port"])
+        ftp.login(login_dict["user"], login_dict["passwd"])
+        ftp.prot_p()
+        ftp.cwd("/")
+        filename = "testfile.txt"
+        file_path_local = tmpdir.join(filename)
+        file_path_local.write("test text")
+        with open(str(file_path_local), "rb") as f:
+            ftp.storbinary("STOR "+filename, f)
+        ftp.quit()
+        file_list = list(ftpserver_TLS.get_file_contents()
+        assert file_list == [{"path": "testfile.txt", "content": "test text"}]
+
+
 High-Level Interface
---------------------
+====================
 
 To allow you a faster and more comfortable handling of common ftp tasks a high-level
 interface was implemented. Most of the following methods have the keyword ``anon``, which
@@ -65,6 +118,8 @@ For more information on how those methods work, take a look at the `API Document
            within a function, which means that the ``ftpserver`` fixture isn't available.
            They are thought to be a quick overview of the available functionality and
            its output.
+
+.. _get_login_data:
 
 Getting login credentials
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -180,6 +235,8 @@ yield the paths to all files on the server.
     >>> list(ftpserver.get_file_paths(style="rel_path", anon=True))
     ["test_file3", "test_folder/test_file4"]
 
+.. _get_file_contents:
+
 Gaining information about the content of files on the server
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -217,30 +274,58 @@ i.e. to verify that your file upload functionality did work properly, you can us
 
 
 Configuration
--------------
+=============
 
 To configure custom values for for the username, the users password, the ftp port and/or
 the location of the users home folder on the local storage, you need to set the environment
-variables ``FTP_USER``, ``FTP_PASS``, ``FTP_PORT`` and ``FTP_HOME``.
-You can either do that on a system level or use tools such as
+variables ``FTP_USER``, ``FTP_PASS``, ``FTP_PORT``, ``FTP_HOME``, ``FTP_FIXTURE_SCOPE``,
+``FTP_PORT_TLS``, ``FTP_HOME_TLS`` and ``FTP_CERTFILE``.
+
+
+=====================   =====================================================================
+Environment variable    Usage
+=====================   =====================================================================
+``FTP_USER``            Username of the registered user.
+``FTP_PASS``            Password of the registered user.
+``FTP_PORT``            Port for the normal ftp server to run on.
+``FTP_HOME``            Home folder of the registered user.
+``FTP_FIXTURE_SCOPE``   Scope/lifetime of the fixture.
+``FTP_PORT_TLS``        Port for the TLS ftp server to run on.
+``FTP_HOME_TLS``        Home folder of the registered user, used by the TLS ftp server.
+``FTP_CERTFILE``        Certificate to be used by the TLS ftp server.
+=====================   =====================================================================
+
+You can either set environment variables on a system level or use tools such as
 `pytest-env <https://pypi.org/project/pytest-env/>`_ or
-`tox <https://pypi.org/project/tox/>`_
+`tox <https://pypi.org/project/tox/>`_, which would be the recommended way.
+
+.. note::  You might run into ``OSError: [Errno 48] Address already in use`` when setting a fixed port
+           (``FTP_PORT``/ ``FTP_PORT_TLS``).
+           This is due to the server still listening on that port, which prevents it from adding another listener
+           on that port. When using pythons buildin ``ftplib``, you should use the
+           `quit method <https://docs.python.org/3.7/library/ftplib.html#ftplib.FTP.quit>`_
+           to terminate the connection, since it's the `'the “polite” way to close a connection'` and lets the
+           server know that the client isn't just experiencing connection problems, but won't come back.
 
 Configuration with pytest-env
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The configuration of pytest-env is done in the ``pytest.ini`` file.
-The following example configuration will use the username ``benz``, the password ``erni1``
-and the ftp port ``31175``. If a ::
+The following example configuration will use the username ``benz``, the password ``erni1``,
+the ftp port ``31175`` and the home folder ``/home/ftp_test``.
+For the encrypted version of the fixture it uses port ``31176``, the home folder ``/home/ftp_test`` and
+the certificate ``./tests/test_keycert.pem``::
 
     $ cat pytest.ini
     [pytest]
     env =
         FTP_USER=benz
         FTP_PASS=erni1
+        FTP_HOME = /home/ftp_test
         FTP_PORT=31175
         FTP_FIXTURE_SCOPE=function
         # only affects ftpserver_TLS
         FTP_PORT_TLS = 31176
+        FTP_HOME_TLS = /home/ftp_test_TLS
         FTP_CERTFILE = ./tests/test_keycert.pem
 
 
@@ -250,7 +335,10 @@ Configuration with Tox
 The configuration of tox is done in the ``tox.ini`` file.
 The following example configuration will run the tests in the folder ``tests`` on
 python 2.7, 3.4, 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
-the tempfolder of of each virtual environment the tests are run in and the ftp port ``31175``::
+the tempfolder of each virtual environment the tests are run in (``{envtmpdir}``) and
+the ftp port ``31175``.
+For the encrypted version of the fixture it uses port ``31176`` and the certificate
+``{toxinidir}/tests/test_keycert.pem``::
 
     $ cat tox.ini
     [tox]
@@ -258,13 +346,14 @@ the tempfolder of of each virtual environment the tests are run in and the ftp p
 
     [testenv]
     setenv =
-        FTP_USER = benz
-        FTP_PASS = erni1
+        FTP_USER=benz
+        FTP_PASS=erni1
         FTP_HOME = {envtmpdir}
-        FTP_PORT = 31175
+        FTP_PORT=31175
         FTP_FIXTURE_SCOPE=function
         # only affects ftpserver_TLS
         FTP_PORT_TLS = 31176
+        FTP_HOME_TLS = /home/ftp_test_TLS
         FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
     commands =
         py.test tests

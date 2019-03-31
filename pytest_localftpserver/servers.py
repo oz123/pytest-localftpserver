@@ -51,6 +51,10 @@ class SimpleFTPServer(FTPServer):
         Local path to FTP home for the registered user.
     ftp_port: int
         Desired port for the server to listen to.
+    use_TLS: bool
+        Whether or not to use TLS/SSL encryption.
+    certfile: str, Path
+        Path to the certificate file.
     """
 
     def __init__(self, username="fakeusername", password="qweqwe", ftp_home=None,
@@ -59,7 +63,10 @@ class SimpleFTPServer(FTPServer):
         self._anon_root = tempfile.mkdtemp(prefix="anon_root_")
         if not ftp_home:
             self.temp_ftp_home = True
-            self._ftp_home = tempfile.mkdtemp(prefix="ftp_home_")
+            if use_TLS:
+                self._ftp_home = tempfile.mkdtemp(prefix="ftp_home_TLS_")
+            else:
+                self._ftp_home = tempfile.mkdtemp(prefix="ftp_home_")
         else:
             self.temp_ftp_home = False
             self._ftp_home = ftp_home
@@ -129,7 +136,7 @@ class FunctionalityWrapper(object):
     Parameters
     ----------
     use_TLS: bool
-        Weather  or not to use TLS/SSL encryption.
+        Whether or not to use TLS/SSL encryption.
 
     Notes
     -----
@@ -655,11 +662,11 @@ class FunctionalityWrapper(object):
                 The content of all files on the server will be retrieved.
 
             str or list of str:
-                only the content of those files will be retrieved.
+                Only the content of those files will be retrieved.
 
         style: {'rel_path', 'url'}, default 'rel_path'
             'rel_path':
-                path relative to server_home/anon_root is returned.
+                Path relative to server_home/anon_root is returned.
 
             'url':
                 A url to the file is returned.
@@ -1021,7 +1028,7 @@ class FunctionalityWrapper(object):
             If the value of `read_mode` is not 'r' or 'rb'
 
         WrongFixtureError
-            If used on ftpserver fixture, instead of ftpserver_TLS fixture.
+            If used on ``ftpserver`` fixture, instead of ``ftpserver_TLS`` fixture.
 
         Examples
         --------
@@ -1051,6 +1058,13 @@ class FunctionalityWrapper(object):
         Stops the server, closes all the open ports and deletes all temp files.
         This is especially useful if you want to test if your code behaves
         gracefully, when the ftpserver isn't reachable.
+
+        Warning
+        -------
+
+        If pytest-localftpserver is run in 'module' (default) or 'session' scope,
+        this should be the last test run using this fixture (in the given test module or suite),
+        Since the server can't be restarted.
 
         Examples
         --------
