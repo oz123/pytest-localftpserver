@@ -149,8 +149,9 @@ matrix:
         - coverage erase
 
   allow_failures:
-#      this test is allowed to fail since it uses external resources
+#      this tests are allowed to fail since they rely external resources
     - env: TOXENV=docs-links
+    - env: win-coverage
 
 install:
   - python -m pip install -U pip>=8.1.2
