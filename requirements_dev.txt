@@ -5,7 +5,7 @@ watchdog>=0.8.3
 # install requirements
 pyftpdlib==1.5.4
 PyOpenSSL==19.0.0
-pytest==4.3.1
+pytest==4.4.0
 
 # documentation
 Sphinx>=1.7.5
@@ -13,6 +13,6 @@ sphinx-rtd-theme>=0.3.1
 
 # testing
 flake8>=2.6.0
-tox==3.8.1
+tox==3.8.3
 coverage>=4.3.0
 wget>=3.2
