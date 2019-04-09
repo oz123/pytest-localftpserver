@@ -4,9 +4,125 @@ from __future__ import print_function, absolute_import
 
 from copy import deepcopy
 import logging
+import os
+import socket
 import sys
 from traceback import print_tb
 import warnings
+
+from ssl import SSLContext, SSLError
+try:
+    from ssl import PROTOCOL_TLS
+except Exception:
+    from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
+
+DEFAULT_CERTFILE = os.path.join(os.path.dirname(__file__),
+                                "default_keycert.pem")
+
+
+class InvalidCertificateError(Exception):
+    pass
+
+
+def get_env_dict(use_TLS=False):
+    """
+    Retrieves the environment variables used to configure
+    the ftpserver fixtures
+
+    Returns
+    -------
+    env_dict: dict
+        Dict containing the environment variables used to configure
+        the ftp fixtures or its default values.
+    """
+    env_dict = {}
+    env_dict["username"] = os.getenv("FTP_USER", "fakeusername")
+    env_dict["password"] = os.getenv("FTP_PASS", "qweqwe")
+    if use_TLS:
+        env_dict["ftp_home"] = os.getenv("FTP_HOME_TLS", "")
+        env_dict["ftp_port"] = int(os.getenv("FTP_PORT_TLS", 0))
+    else:
+        env_dict["ftp_home"] = os.getenv("FTP_HOME", "")
+        env_dict["ftp_port"] = int(os.getenv("FTP_PORT", 0))
+
+    env_dict["certfile"] = os.path.abspath(os.getenv("FTP_CERTFILE",
+                                                     DEFAULT_CERTFILE))
+    return env_dict
+
+
+def get_scope():
+    """
+    Retrieves the environment variables used to configure
+    the ftpserver fixtures
+
+    Returns
+    -------
+    scope: {'function', 'module', 'session'}: default 'module'
+        Scope at which the fixture should be.
+
+    """
+    scope = os.getenv("FTP_FIXTURE_SCOPE", "module")
+    if scope not in ["function", "module", "session"]:
+        warnings.warn("The scope '{}', given by the environment variable 'FTP_FIXTURE_SCOPE' "
+                      "is not a valid scope, which is why the default scope 'module'was used. "
+                      "Valid scopes are 'function', 'module' and 'session'.".format(scope),
+                      UserWarning)
+        scope = "module"
+    return scope
+
+
+def validate_cert_file(cert_file):
+    """
+
+    Parameters
+    ----------
+    cert_file: str
+        Path to the certfile to be checked.
+
+    Raises
+    ------
+
+    InvalidCertificateError
+        If the certificate is not valid.
+
+    """
+    cert_file = os.path.abspath(cert_file)
+    try:
+        context = SSLContext(PROTOCOL_TLS)
+        context.load_cert_chain(cert_file)
+    except SSLError:
+        raise InvalidCertificateError("The certificate {}, you tried to use is not valid. "
+                                      "Please make sure to use a working certificate or "
+                                      "leave it unconfigured to use the default certificate."
+                                      "".format(cert_file))
+
+
+def get_socket(desired_port=0):
+    """
+
+    Parameters
+    ----------
+    desired_port: int
+        Port which is desired to be used
+
+    Returns
+    -------
+    (socket, port): tuple
+        Serveraddress as tuple '(socket, port)'
+
+    """
+    free_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    try:
+        free_socket.bind(("", desired_port))
+    except Exception:
+        # Create a socket on any free port, if desired_port is taken
+        free_socket.bind(("", 0))
+    host, free_port = free_socket.getsockname()
+    if desired_port != 0 and desired_port != free_port:
+        warnings.warn("PYTEST_LOCALFTPSERVER: The desire port {} was not free, so the "
+                      "server will run at port {}.".format(desired_port, free_port),
+                      UserWarning)
+    return free_socket, free_port
 
 
 def pretty_logger(heading, msg):

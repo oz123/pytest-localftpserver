@@ -10,7 +10,7 @@ Tests for `pytest_localftpserver` module.
 
 from __future__ import print_function
 
-from ftplib import FTP, error_perm
+from ftplib import FTP, FTP_TLS, error_perm
 import logging
 import os
 import socket
@@ -19,10 +19,17 @@ import sys
 import pytest
 import wget
 
-from pytest_localftpserver import plugin
+from pytest_localftpserver.plugin import PytestLocalFTPServer
+from pytest_localftpserver.servers import USE_PROCESS
+from pytest_localftpserver.helper_functions import DEFAULT_CERTFILE
 
 
 if sys.version_info[0] == 3:
+    from ssl import SSLContext
+    try:
+        from ssl import PROTOCOL_TLS
+    except Exception:
+        from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
     PYTHON3 = True
 else:
     import urllib2
@@ -39,14 +46,14 @@ FILE_LIST = [("", "testfile1"),
              ]
 
 
-def ftp_login(ftpserver, anon=False):
+def ftp_login(ftp_fixture, anon=False, use_TLS=False):
     """
     Convenience function to reduce code overhead.
     Logs in the FTP client and returns the ftplib.FTP instance
 
     Parameters
     ----------
-    ftpserver: ThreadFTPServer, ProcessFTPServer
+    ftp_fixture: FTPServer
 
     anon: bool
             True:
@@ -61,24 +68,52 @@ def ftp_login(ftpserver, anon=False):
         logged in FTP client
 
     """
-    login_dict = ftpserver.get_login_data()
-    ftp = FTP()
+    if use_TLS:
+        if PYTHON3:
+            ssl_context = SSLContext(PROTOCOL_TLS)
+            ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
+            ftp = FTP_TLS(context=ssl_context)
+        else:
+            ftp = FTP_TLS(certfile=DEFAULT_CERTFILE)
+    else:
+        ftp = FTP()
+    login_dict = ftp_fixture.get_login_data()
     ftp.connect(login_dict["host"], login_dict["port"])
     if anon:
         ftp.login()
     else:
         ftp.login(login_dict["user"], login_dict["passwd"])
+    if use_TLS:
+        ftp.prot_p()
     return ftp
 
 
-def check_files_by_ftpclient(ftpserver, tmpdir, files_on_server, path_iterable, anon):
+def close_client(session):
+    # taken from https://github.com/giampaolo/pyftpdlib/blob/master/pyftpdlib/test/__init__.py
+    """Closes a ftplib.FTP client session."""
+    try:
+        if session.sock is not None:
+            try:
+                resp = session.quit()
+            except Exception:
+                pass
+            else:
+                # ...just to make sure the server isn't replying to some
+                # pending command.
+                assert resp.startswith('221'), resp
+    finally:
+        session.close()
+
+
+def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable,
+                             anon=False, use_TLS=False):
     """
     Convenience function to reduce code overhead.
     Downloading files with a native ftp client and checking their content.
 
     Parameters
     ----------
-    ftpserver: ThreadFTPServer, ProcessFTPServer
+    ftp_fixture: FTPServer
 
     anon: bool
             True:
@@ -95,10 +130,10 @@ def check_files_by_ftpclient(ftpserver, tmpdir, files_on_server, path_iterable, 
     # checking the files by rel_path to user home dir
     # and native ftp client
     if anon:
-        base_path = ftpserver.anon_root
+        base_path = ftp_fixture.anon_root
     else:
-        base_path = ftpserver.server_home
-    ftp = ftp_login(ftpserver, anon=anon)
+        base_path = ftp_fixture.server_home
+    ftp = ftp_login(ftp_fixture, anon=anon, use_TLS=use_TLS)
     download_dir = tmpdir.mkdir("download_rel_path")
     for file_path in path_iterable:
         abs_file_path = os.path.abspath(os.path.join(base_path, file_path))
@@ -113,7 +148,7 @@ def check_files_by_ftpclient(ftpserver, tmpdir, files_on_server, path_iterable, 
             ftp.retrbinary("RETR "+file_path, f.write)
         with open(str(download_file), "r") as f:
             assert f.read() == filename
-    ftp.quit()
+    close_client(ftp)
     download_dir.remove()
 
 
@@ -188,14 +223,38 @@ def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
         assert content_dict["content"] == file_content
 
 
+def run_ftp_stopped_test(ftpserver_fixture):
+    """
+    Tests if the Server is unreachable after shutdown, by checking if a client that
+    tries to connect raises an exception.
+
+    Parameters
+    ----------
+    ftpserver_fixture: PytestLocalFTPServer
+
+    """
+    ftpserver_fixture.stop()
+    ftp = FTP()
+
+    if PYTHON3:
+        if USE_PROCESS:
+            with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
+                ftp.connect("localhost", port=ftpserver_fixture.server_port)
+        else:
+            with pytest.raises(OSError):
+                ftp.connect("localhost", port=ftpserver_fixture.server_port)
+    else:
+        # python2.7 raises a different error than python3
+        with pytest.raises(socket.error):
+            ftp.connect("localhost", port=ftpserver_fixture.server_port)
+
+
 # ACTUAL TESTS
 
 
 def test_ftpserver_class(ftpserver):
-    if plugin.USE_PROCESS:
-        assert isinstance(ftpserver, plugin.ProcessFTPServer)
-    else:
-        assert isinstance(ftpserver, plugin.ThreadFTPServer)
+    assert isinstance(ftpserver, PytestLocalFTPServer)
+    assert ftpserver.uses_TLS is False
 
 
 @pytest.mark.parametrize("anon",
@@ -310,7 +369,7 @@ def test_file_upload_user(ftpserver, tmpdir):
     file_path_local.write("test")
     with open(str(file_path_local), "rb") as f:
         ftp.storbinary("STOR "+filename, f)
-    ftp.quit()
+    close_client(ftp)
 
     assert os.path.isdir(os.path.join(ftpserver.server_home, "FOO"))
     abs_file_path_server = os.path.join(ftpserver.server_home, "FOO", filename)
@@ -325,7 +384,7 @@ def test_file_upload_anon(ftpserver):
     ftp.cwd("/")
     with pytest.raises(error_perm):
         ftp.mkd("FOO")
-    ftp.quit()
+    close_client(ftp)
 
 
 @pytest.mark.parametrize("anon",
@@ -524,7 +583,7 @@ def test_put_files(tmpdir, ftpserver, use_dict, style, anon, overwrite,
 
     if style == "rel_path":
         if not return_content:
-            check_files_by_ftpclient(ftpserver=ftpserver, tmpdir=tmpdir,
+            check_files_by_ftpclient(ftp_fixture=ftpserver, tmpdir=tmpdir,
                                      files_on_server=files_on_server,
                                      path_iterable=put_files_return, anon=anon)
         else:
@@ -687,20 +746,14 @@ def test_option_validator_logging(caplog, ftpserver):
 def test_ftp_stopped(ftpserver):
     local_anon_path = ftpserver.get_local_base_path(anon=True)
     local_ftp_home = ftpserver.get_local_base_path(anon=False)
-    ftpserver.stop()
-    ftp = FTP()
-
-    if PYTHON3:
-        if plugin.USE_PROCESS:
-            with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
-                ftp.connect("localhost", port=ftpserver.server_port)
-        else:
-            with pytest.raises(OSError):
-                ftp.connect("localhost", port=ftpserver.server_port)
-    else:
-        # python2.7 raises a different error than python3
-        with pytest.raises(socket.error):
-            ftp.connect("localhost", port=ftpserver.server_port)
+    run_ftp_stopped_test(ftpserver)
     # check if all temp folders got cleared properly
     assert not os.path.exists(local_anon_path)
     assert not os.path.exists(local_ftp_home)
+
+
+def test_fail_due_to_closed_module_scope(ftpserver):
+    """This test is just meant to confirm that the server is down on module scope"""
+    ftp = FTP()
+    with pytest.raises(Exception):
+        ftp.connect("localhost", port=ftpserver.server_port)

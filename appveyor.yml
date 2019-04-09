@@ -54,7 +54,7 @@ build: none
 test_script:
   # delete old .coverage file
   - coverage erase
-  - tox -e py{27,34,35,36,37}, env_var_coverage
+  - tox -e py{27,34,35,36,37}, custom_config
 
 artifacts:
   - path: .coverage

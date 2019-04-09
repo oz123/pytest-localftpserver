@@ -12,7 +12,7 @@ To install PyTest FTP Server, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install pytest_localftpserver
+    $ pip install pytest-localftpserver
 
 This is the preferred method to install PyTest FTP Server, as it will always install the most recent stable release.
 

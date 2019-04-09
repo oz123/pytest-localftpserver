@@ -38,42 +38,65 @@ A PyTest plugin which provides an FTP fixture for your tests
 Usage Quickstart:
 =================
 
-  ``ftpserver``
-  provides a threaded FTP server where you can upload files and test FTP
-  functionality. It has the following attributes:
+  This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
+  which are threaded instances of a FTP server, with which you can upload files and test FTP
+  functionality. It can be configured using the following environment variables:
 
-  * ``ftp_port`` - the server port as integer
-  * ``anon_root`` - the root of anonymous user
-  * ``ftp_home`` - the root of authenticated user
+=====================   =====================================================================
+Environment variable    Usage
+=====================   =====================================================================
+``FTP_USER``            Username of the registered user.
+``FTP_PASS``            Password of the registered user.
+``FTP_PORT``            Port for the normal ftp server to run on.
+``FTP_HOME``            Home folder of the registered user.
+``FTP_FIXTURE_SCOPE``   Scope/lifetime of the fixture.
+``FTP_PORT_TLS``        Port for the TLS ftp server to run on.
+``FTP_HOME_TLS``        Home folder of the registered user, used by the TLS ftp server.
+``FTP_CERTFILE``        Certificate to be used by the TLS ftp server.
+=====================   =====================================================================
 
 
-See the tests directory or the documentation for examples.
+See the `tests directory <https://github.com/oz123/pytest-localftpserver/tree/master/tests>`_
+or the
+`documentation <https://pytest-localftpserver.readthedocs.io/en/latest/usage.html>`_
+for examples.
 
-You need `pytest-env <https://pypi.org/project/pytest-env/>`_  or
-`tox <https://pypi.org/project/tox/>`_
-to change the default settings of this plugin.
+You can either set environment variables on a system level or use tools such as
+`pytest-env <https://pypi.org/project/pytest-env/>`_ or
+`tox <https://pypi.org/project/tox/>`_, to change the default settings of this plugin.
 Sample config for pytest-cov::
 
     $ cat pytest.ini
     [pytest]
     env =
-        FTP_PORT=31175
         FTP_USER=benz
         FTP_PASS=erni1
+        FTP_HOME = /home/ftp_test
+        FTP_PORT=31175
+        FTP_FIXTURE_SCOPE=function
+        # only affects ftpserver_TLS
+        FTP_PORT_TLS = 31176
+        FTP_HOME_TLS = /home/ftp_test_TLS
+        FTP_CERTFILE = ./tests/test_keycert.pem
 
 
 Sample config for Tox::
 
     $ cat tox.ini
     [tox]
-    envlist = py{27,34,35,36}, flake8
+    envlist = py{27,34,35,36,37}
 
     [testenv]
     setenv =
-        FTP_USER = benz
-        FTP_PASS = erni1
+        FTP_USER=benz
+        FTP_PASS=erni1
         FTP_HOME = {envtmpdir}
-        FTP_PORT = 31175
+        FTP_PORT=31175
+        FTP_FIXTURE_SCOPE=function
+        # only affects ftpserver_TLS
+        FTP_PORT_TLS = 31176
+        FTP_HOME_TLS = /home/ftp_test_TLS
+        FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
     commands =
         py.test tests
 
