@@ -1,6 +1,4 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function, absolute_import
 
 import collections
 from functools import wraps
@@ -219,7 +217,7 @@ class FunctionalityWrapper(object):
         """
         return self._server._cert_path
 
-    def _option_validator(valid_var_overwrite=None,
+    def _option_validator(valid_var_overwrite=None,  # pylint: disable=no-self-argument
                           strict_type_check=True,
                           dev_mode=False,
                           debug=False):
@@ -632,7 +630,7 @@ class FunctionalityWrapper(object):
 
         """
         base_path = self.get_local_base_path(anon=anon)
-        for root, dirs, files in os.walk(base_path):
+        for root, _, files in os.walk(base_path):
             for file in files:
                 rel_file_path = os.path.relpath(os.path.join(root, file),
                                                 base_path)
