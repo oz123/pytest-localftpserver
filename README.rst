@@ -4,12 +4,12 @@ PyTest FTP Server
 
 
 .. image:: https://img.shields.io/pypi/v/pytest_localftpserver.svg
-        :target: https://pypi.python.org/pypi/pytest_localftpserver
+        :target:  https://pypi.org/project/pytest-localftpserver/
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest_localftpserver.svg
     :target: https://pypi.org/project/pytest/
 
-.. image:: https://travis-ci.org/oz123/pytest-localftpserver.svg?branch=master
+.. image:: https://api.travis-ci.org/oz123/pytest-localftpserver.svg?branch=master
         :target: https://travis-ci.org/oz123/pytest-localftpserver
 
 .. image:: https://ci.appveyor.com/api/projects/status/github/oz123/pytest-localftpserver?svg=true
@@ -103,7 +103,7 @@ Sample config for Tox::
 Credits
 =======
 
-This package was inspired by, https://pypi.python.org/pypi/pytest-localserver/
+This package was inspired by,  https://pypi.org/project/pytest-localserver/
 made by Sebastian Rahlf, which lacks an FTP server.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
