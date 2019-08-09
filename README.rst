@@ -44,9 +44,9 @@ If you need to support those versions you should pin the version ``pytest_localf
 Usage Quickstart:
 =================
 
-  This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
-  which are threaded instances of a FTP server, with which you can upload files and test FTP
-  functionality. It can be configured using the following environment variables:
+This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
+which are threaded instances of a FTP server, with which you can upload files and test FTP
+functionality. It can be configured using the following environment variables:
 
 =====================   =====================================================================
 Environment variable    Usage
