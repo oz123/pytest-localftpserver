@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from __future__ import print_function, absolute_import
 
@@ -11,10 +10,7 @@ from traceback import print_tb
 import warnings
 
 from ssl import SSLContext, SSLError
-try:
-    from ssl import PROTOCOL_TLS
-except Exception:
-    from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
+from ssl import PROTOCOL_TLS
 
 DEFAULT_CERTFILE = os.path.join(os.path.dirname(__file__),
                                 "default_keycert.pem")
@@ -117,7 +113,7 @@ def get_socket(desired_port=0):
     except Exception:
         # Create a socket on any free port, if desired_port is taken
         free_socket.bind(("", 0))
-    host, free_port = free_socket.getsockname()
+    _, free_port = free_socket.getsockname()
     if desired_port != 0 and desired_port != free_port:
         warnings.warn("PYTEST_LOCALFTPSERVER: The desire port {} was not free, so the "
                       "server will run at port {}.".format(desired_port, free_port),
@@ -267,7 +263,7 @@ def arg_validator(func_locals, valid_var_dict, valid_var_overwrite=None,
         if not isinstance(valid_var_overwrite, dict):
             raise TypeError(error_msg)
 
-        for argument_name, value_dict in valid_var_overwrite.items():
+        for _, value_dict in valid_var_overwrite.items():
             if not isinstance(value_dict, dict):
                 raise TypeError(error_msg)
 
