@@ -2,7 +2,12 @@
 History
 =======
 
-0.6.0 (2019-04-01)
+1.0.0 (unreleased)
+------------------
+
+* Dropped support for Python 2.7 and 3.4
+
+0.6.0 (unreleased)
 ------------------
 
 * Added fixture scope configuration.

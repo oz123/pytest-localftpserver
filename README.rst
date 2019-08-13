@@ -34,13 +34,19 @@ A PyTest plugin which provides an FTP fixture for your tests
 * Free software: MIT license
 * Documentation: https://pytest-localftpserver.readthedocs.io/en/latest/index.html
 
+Attention!
+==========
+
+As of version ``1.0.0`` the support for python 2.7 and 3.4 was dropped.
+If you need to support those versions you should pin the version ``pytest_localftpserver==0.6.0``.
+
 
 Usage Quickstart:
 =================
 
-  This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
-  which are threaded instances of a FTP server, with which you can upload files and test FTP
-  functionality. It can be configured using the following environment variables:
+This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
+which are threaded instances of a FTP server, with which you can upload files and test FTP
+functionality. It can be configured using the following environment variables:
 
 =====================   =====================================================================
 Environment variable    Usage
@@ -108,6 +114,6 @@ made by Sebastian Rahlf, which lacks an FTP server.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _Cookiecutter:  https://github.com/cookiecutter/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 
