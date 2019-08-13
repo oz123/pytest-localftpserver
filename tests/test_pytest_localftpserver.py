@@ -8,13 +8,9 @@ test_pytest_localftpserver
 Tests for `pytest_localftpserver` module.
 """
 
-from __future__ import print_function
-
 from ftplib import FTP, FTP_TLS, error_perm
 import logging
 import os
-import socket
-import sys
 
 import pytest
 import wget
@@ -24,18 +20,7 @@ from pytest_localftpserver.servers import USE_PROCESS
 from pytest_localftpserver.helper_functions import DEFAULT_CERTFILE
 
 
-if sys.version_info[0] == 3:
-    from ssl import SSLContext
-    try:
-        from ssl import PROTOCOL_TLS
-    except Exception:
-        from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
-    PYTHON3 = True
-else:
-    import urllib2
-    from contextlib import closing
-    import shutil
-    PYTHON3 = False
+from ssl import SSLContext, PROTOCOL_TLS
 
 # HELPER FUNCTIONS
 
@@ -69,12 +54,9 @@ def ftp_login(ftp_fixture, anon=False, use_TLS=False):
 
     """
     if use_TLS:
-        if PYTHON3:
-            ssl_context = SSLContext(PROTOCOL_TLS)
-            ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
-            ftp = FTP_TLS(context=ssl_context)
-        else:
-            ftp = FTP_TLS(certfile=DEFAULT_CERTFILE)
+        ssl_context = SSLContext(PROTOCOL_TLS)
+        ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
+        ftp = FTP_TLS(context=ssl_context)
     else:
         ftp = FTP()
     login_dict = ftp_fixture.get_login_data()
@@ -169,14 +151,9 @@ def check_files_by_urls(tmpdir, base_url, url_iterable):
     # checking files by url
     download_dir = tmpdir.mkdir("download_url")
     for url in url_iterable:
-        dirs, filename = os.path.split(os.path.relpath(url, base_url))
+        _, filename = os.path.split(os.path.relpath(url, base_url))
         download_file = download_dir.join(filename)
-        if not PYTHON3:
-            with closing(urllib2.urlopen(url)) as r:
-                with open(str(download_file), 'wb') as f:
-                    shutil.copyfileobj(r, f)
-        else:
-            wget.download(url, str(download_file))
+        wget.download(url, str(download_file))
         with open(str(download_file), "r") as f:
             assert f.read() == filename
     download_dir.remove()
@@ -235,17 +212,11 @@ def run_ftp_stopped_test(ftpserver_fixture):
     """
     ftpserver_fixture.stop()
     ftp = FTP()
-
-    if PYTHON3:
-        if USE_PROCESS:
-            with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
-                ftp.connect("localhost", port=ftpserver_fixture.server_port)
-        else:
-            with pytest.raises(OSError):
-                ftp.connect("localhost", port=ftpserver_fixture.server_port)
+    if USE_PROCESS:
+        with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
+            ftp.connect("localhost", port=ftpserver_fixture.server_port)
     else:
-        # python2.7 raises a different error than python3
-        with pytest.raises(socket.error):
+        with pytest.raises(OSError):
             ftp.connect("localhost", port=ftpserver_fixture.server_port)
 
 

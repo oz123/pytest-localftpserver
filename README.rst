@@ -34,6 +34,12 @@ A PyTest plugin which provides an FTP fixture for your tests
 * Free software: MIT license
 * Documentation: https://pytest-localftpserver.readthedocs.io/en/latest/index.html
 
+Attention!
+==========
+
+As of version ``1.0.0`` the support for python 2.7 and 3.4 was dropped.
+If you need to support those versions you should pin the version ``pytest_localftpserver==0.6.0``.
+
 
 Usage Quickstart:
 =================

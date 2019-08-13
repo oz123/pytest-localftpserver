@@ -4,8 +4,6 @@ language: python
 cache: pip
 
 python:
-  - 2.7
-  - 3.4
   - 3.5
   - 3.6
 
@@ -35,40 +33,6 @@ matrix:
       dist: xenial
       python: "3.7"
       env: linux-py37
-
-    - language: generic
-      python: 2.7
-      env: osx-py27
-      os: osx
-      before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-        - bash miniconda.sh -b -p $HOME/miniconda
-        - export PATH="$HOME/miniconda/bin:$PATH"
-        - conda update conda -y
-        - conda create -n py27 python=2.7 -y
-      install:
-        - source activate py27
-        - conda config --add channels conda-forge
-        - conda install -y --name py27 tox coveralls
-        - pip freeze
-      script: tox -e py27
-
-    - language: generic
-      python: 3.4
-      env: osx-py34
-      os: osx
-      before_install:
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh;
-        - bash miniconda.sh -b -p $HOME/miniconda
-        - export PATH="$HOME/miniconda/bin:$PATH"
-        - conda update conda -y
-        - conda create -n py34 python=3.4 -y
-      install:
-        - source activate py34
-        - conda config --add channels conda-forge
-        - conda install -y --name py34 tox coveralls
-        - pip freeze
-      script: tox -e py34
 
     - language: generic
       python: 3.5
