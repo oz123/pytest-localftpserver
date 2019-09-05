@@ -2,13 +2,13 @@
 History
 =======
 
-1.0.0 (unreleased)
+1.0.0 (2019-09-05)
 ------------------
 
 * Dropped support for Python 2.7 and 3.4
 
-0.6.0 (unreleased)
-------------------
+0.6.0 - released as tag only
+----------------------------
 
 * Added fixture scope configuration.
 * Added ``ftpserver_TLS`` as TLS version of the fixture.
