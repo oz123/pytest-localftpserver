@@ -22,7 +22,7 @@ test_requirements = [
 
 setup(
     name='pytest_localftpserver',
-    version='0.6.0',
+    version='1.0.0',
     description="A PyTest plugin which provides an FTP fixture for your tests",
     long_description=readme + '\n\n' + history,
     long_description_content_type="text/x-rst",
