@@ -114,6 +114,6 @@ made by Sebastian Rahlf, which lacks an FTP server.
 
 This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
 
-.. _Cookiecutter:  https://github.com/cookiecutter/cookiecutter
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 
