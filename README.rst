@@ -37,7 +37,7 @@ Attention!
 ==========
 
 As of version ``1.0.0`` the support for python 2.7 and 3.4 was dropped.
-If you need to support those versions you should pin the version to ``0.0.6``,
+If you need to support those versions you should pin the version to ``0.6.0``,
 i.e. add the following lines to your "requirements_dev.txt"::
 
         # pytest_localftpserver==0.6.0
