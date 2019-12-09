@@ -86,11 +86,12 @@ def validate_cert_file(cert_file):
     try:
         context = SSLContext(PROTOCOL_TLS)
         context.load_cert_chain(cert_file)
-    except SSLError:
+    except SSLError as e:
         raise InvalidCertificateError("The certificate {}, you tried to use is not valid. "
                                       "Please make sure to use a working certificate or "
                                       "leave it unconfigured to use the default certificate."
-                                      "".format(cert_file))
+                                      "Details: {}"
+                                      "".format(cert_file, e))
 
 
 def get_socket(desired_port=0):
