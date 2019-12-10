@@ -5,6 +5,7 @@ include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
+include pytest_localftpserver/default_keycert.pem
 
 recursive-include tests *
 recursive-exclude * __pycache__
