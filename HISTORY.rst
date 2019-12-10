@@ -1,6 +1,12 @@
 History
 =======
 
+1.0.1 (2019-12-10)
+------------------
+
+* Include the certificate in the source package
+* Use a bigger certificate
+
 1.0.0 (2019-09-05)
 ------------------
 
