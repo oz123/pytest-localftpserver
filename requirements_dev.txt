@@ -3,7 +3,7 @@ wheel>=0.30.0
 watchdog>=0.8.3
 
 # install requirements
-pyftpdlib==1.5.5
+pyftpdlib==1.5.6
 PyOpenSSL==19.1.0
 pytest==5.3.1
 
