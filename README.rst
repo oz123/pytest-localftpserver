@@ -93,7 +93,7 @@ Sample config for Tox::
 
     $ cat tox.ini
     [tox]
-    envlist = py{27,34,35,36,37}
+    envlist = py{35,36,37}
 
     [testenv]
     setenv =
