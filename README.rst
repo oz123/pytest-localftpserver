@@ -5,6 +5,9 @@ PyTest FTP Server
 .. image:: https://img.shields.io/pypi/v/pytest_localftpserver.svg
         :target:  https://pypi.org/project/pytest-localftpserver/
 
+.. image:: https://camo.githubusercontent.com/89b9f56d30241e30f546daf9f43653f08e920f16/68747470733a2f2f696d672e736869656c64732e696f2f636f6e64612f766e2f636f6e64612d666f7267652f7079746573742d6c6f63616c6674707365727665722e737667
+        :target:  https://anaconda.org/conda-forge/pytest-localftpserver
+
 .. image:: https://img.shields.io/pypi/pyversions/pytest_localftpserver.svg
     :target: https://pypi.org/project/pytest/
 
