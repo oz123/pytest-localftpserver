@@ -334,7 +334,7 @@ Configuration with Tox
 
 The configuration of tox is done in the ``tox.ini`` file.
 The following example configuration will run the tests in the folder ``tests`` on
-python 2.7, 3.4, 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
+python 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
 the tempfolder of each virtual environment the tests are run in (``{envtmpdir}``) and
 the ftp port ``31175``.
 For the encrypted version of the fixture it uses port ``31176`` and the certificate
