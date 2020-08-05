@@ -54,18 +54,18 @@ This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
 which are threaded instances of a FTP server, with which you can upload files and test FTP
 functionality. It can be configured using the following environment variables:
 
-=====================   =====================================================================
+=====================   =============================================================================
 Environment variable    Usage
-=====================   =====================================================================
+=====================   =============================================================================
 ``FTP_USER``            Username of the registered user.
 ``FTP_PASS``            Password of the registered user.
 ``FTP_PORT``            Port for the normal ftp server to run on.
-``FTP_HOME``            Home folder of the registered user.
+``FTP_HOME``            Home folder (host system) of the registered user.
 ``FTP_FIXTURE_SCOPE``   Scope/lifetime of the fixture.
 ``FTP_PORT_TLS``        Port for the TLS ftp server to run on.
-``FTP_HOME_TLS``        Home folder of the registered user, used by the TLS ftp server.
-``FTP_CERTFILE``        Certificate to be used by the TLS ftp server.
-=====================   =====================================================================
+``FTP_HOME_TLS``        Home folder (host system) of the registered user, used by the TLS ftp server.
+``FTP_CERTFILE``        Certificate (host system) to be used by the TLS ftp server.
+=====================   =============================================================================
 
 
 See the `tests directory <https://github.com/oz123/pytest-localftpserver/tree/master/tests>`_
