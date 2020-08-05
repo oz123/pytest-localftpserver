@@ -282,18 +282,18 @@ variables ``FTP_USER``, ``FTP_PASS``, ``FTP_PORT``, ``FTP_HOME``, ``FTP_FIXTURE_
 ``FTP_PORT_TLS``, ``FTP_HOME_TLS`` and ``FTP_CERTFILE``.
 
 
-=====================   =====================================================================
+=====================   =============================================================================
 Environment variable    Usage
-=====================   =====================================================================
+=====================   =============================================================================
 ``FTP_USER``            Username of the registered user.
 ``FTP_PASS``            Password of the registered user.
 ``FTP_PORT``            Port for the normal ftp server to run on.
-``FTP_HOME``            Home folder of the registered user.
+``FTP_HOME``            Home folder (host system) of the registered user.
 ``FTP_FIXTURE_SCOPE``   Scope/lifetime of the fixture.
 ``FTP_PORT_TLS``        Port for the TLS ftp server to run on.
-``FTP_HOME_TLS``        Home folder of the registered user, used by the TLS ftp server.
-``FTP_CERTFILE``        Certificate to be used by the TLS ftp server.
-=====================   =====================================================================
+``FTP_HOME_TLS``        Home folder (host system) of the registered user, used by the TLS ftp server.
+``FTP_CERTFILE``        Certificate (host system) to be used by the TLS ftp server.
+=====================   =============================================================================
 
 You can either set environment variables on a system level or use tools such as
 `pytest-env <https://pypi.org/project/pytest-env/>`_ or
