@@ -13,6 +13,6 @@ sphinx-rtd-theme>=0.3.1
 
 # testing
 flake8>=2.6.0
-tox==3.17.1
+tox==3.18.1
 coverage>=4.3.0
 wget>=3.2
