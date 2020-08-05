@@ -14,12 +14,19 @@ To install PyTest FTP Server, run this command in your terminal:
 
     $ pip install pytest-localftpserver
 
-This is the preferred method to install PyTest FTP Server, as it will always install the most recent stable release.
-
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
 
+Or if you prefer to use `conda`_:
+
+.. code-block:: console
+
+    $ conda install -c conda-forge pytest-localftpserver
+
+This are the preferred methods to install PyTest FTP Server, as it will always install the most recent stable release.
+
 .. _pip: https://pip.pypa.io/en/stable/
+.. _conda: https://www.anaconda.com/products/individual
 .. _Python installation guide: https://docs.python-guide.org/starting/installation/
 
 
