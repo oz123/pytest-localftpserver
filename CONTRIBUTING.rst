@@ -59,16 +59,16 @@ Get Started!
 
 Ready to contribute? Here's how to set up `pytest_localftpserver` for local development.
 
-1. Fork the `pytest_localftpserver` repo on GitHub.
+1. Fork the `pytest-localftpserver` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/pytest_localftpserver.git
+    $ git clone git@github.com:your_name_here/pytest-localftpserver.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed,
    this is how you set up your fork for local development::
 
     $ mkvirtualenv pytest_localftpserver
-    $ cd pytest_localftpserver/
+    $ cd pytest-localftpserver/
     $ pip install -r requirements_dev.txt
     $ python setup.py develop
 
