@@ -1,0 +1,138 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    name: Run Quality Assurance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U flake8
+      - name: Lint code
+        run: flake8 pytest_localftpserver tests
+
+  docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Build docs
+        run: make --directory=docs clean_all html
+
+  docs-links:
+    name: Check Links in docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Check doc links
+        continue-on-error: true
+        run: make --directory=docs clean_all linkcheck
+
+
+  test:
+    name: "Tests: py${{ matrix.python-version }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    needs: [lint, docs]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: [3.5, 3.6, 3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install -U coverage tox tox-gh-actions
+      - name: Show installed packages
+        run: pip freeze
+      - name: Run tests
+        run: |
+          tox
+          coverage xml
+      - name: Codecov Upload
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+
+
+  test-custom-config:
+    name: "Tests: Custom config on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    needs: [lint, docs]
+    env:
+      TOX_ENV: custom_config
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install -U coverage tox tox-gh-actions
+      - name: Show installed packages
+        run: pip freeze
+      - name: Run tests
+        run: |
+          tox
+          coverage xml
+      - name: Codecov Upload
+        uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.xml
+
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+    needs: [test, test-custom-config]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip
+          python -m pip install .
+      - name: Build dist
+        run: |
+          python setup.py sdist bdist_wheel
+      - name: Publish package
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_token }}
