@@ -21,8 +21,8 @@ PyTest FTP Server
         :target: https://pytest-localftpserver.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://pyup.io/repos/github/oz123/pytest-localftpserver/shield.svg
-        :target: https://pyup.io/repos/github/oz123/pytest-localftpserver/
+.. image:: https://api.dependabot.com/badges/status?host=github&repo=oz123/pytest-localftpserver
+        :target: https://dependabot.com
         :alt: Updates
 
 .. image:: https://coveralls.io/repos/github/oz123/pytest-localftpserver/badge.svg

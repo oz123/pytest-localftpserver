@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: friday
+      time: "18:00"
+    reviewers:
+      - oz123
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: friday
+      time: "18:00"
+    reviewers:
+      - oz123
