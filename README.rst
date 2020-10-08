@@ -11,11 +11,8 @@ PyTest FTP Server
 .. image:: https://img.shields.io/pypi/pyversions/pytest_localftpserver.svg
     :target: https://pypi.org/project/pytest/
 
-.. image:: https://api.travis-ci.org/oz123/pytest-localftpserver.svg?branch=master
-        :target: https://travis-ci.org/oz123/pytest-localftpserver
-
-.. image:: https://ci.appveyor.com/api/projects/status/github/oz123/pytest-localftpserver?svg=true
-        :target: https://ci.appveyor.com/project/oz123/pytest-localftpserver/branch/master
+.. image:: https://github.com/oz123/pytest-localftpserver/workflows/Tests/badge.svg
+        :target: https://github.com/oz123/pytest-localftpserver/actions?query=workflow%3ATests
 
 .. image:: https://readthedocs.org/projects/pytest-localftpserver/badge/?version=latest
         :target: https://pytest-localftpserver.readthedocs.io/en/latest/?badge=latest

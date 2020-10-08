@@ -117,6 +117,11 @@ pygments_style = 'sphinx'
 # documents.
 #keep_warnings = False
 
+linkcheck_ignore = [
+    r"https://github\.com/oz123/pytest-localftpserver/actions",
+    r"https://github\.com/oz123/pytest-localftpserver/workflows",
+]
+
 
 # -- Options for HTML output -------------------------------------------
 
