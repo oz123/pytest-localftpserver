@@ -112,7 +112,7 @@ High-Level Interface
 To allow you a faster and more comfortable handling of common ftp tasks a high-level
 interface was implemented. Most of the following methods have the keyword ``anon``, which
 allows to switch between the registered (`anon=False`) and the anonymous (`anon=True`) user.
-For more information on how those methods work, take a look at the `API Documentation <api_doc.html>`_ .
+For more information on how those methods work, take a look at the :ref:`API Documentation` .
 
 .. note::  The following examples aren't working code, since the aren't called from
            within a function, which means that the ``ftpserver`` fixture isn't available.
