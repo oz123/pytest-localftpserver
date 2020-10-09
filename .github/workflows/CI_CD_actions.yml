@@ -70,18 +70,19 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          python -m pip install -U coverage tox tox-gh-actions
+          python -m pip install -U coverage coveralls tox tox-gh-actions
       - name: Show installed packages
         run: pip freeze
       - name: Run tests
         run: |
           tox
           coverage xml
-      - name: Codecov Upload
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
-
+      - name: Upload Coverage
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
+          COVERALLS_PARALLEL: true
 
   test-custom-config:
     name: "Tests: Custom config on ${{ matrix.os }}"
@@ -102,17 +103,32 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          python -m pip install -U coverage tox tox-gh-actions
+          python -m pip install -U coverage coveralls tox tox-gh-actions
       - name: Show installed packages
         run: pip freeze
       - name: Run tests
         run: |
           tox
           coverage xml
-      - name: Codecov Upload
-        uses: codecov/codecov-action@v1
-        with:
-          file: ./coverage.xml
+      - name: Upload Coverage
+        run: coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tests-custom_config-${{ matrix.python-version }}-${{ matrix.os }}
+          COVERALLS_PARALLEL: true
+
+  coveralls:
+    name: Finish Coveralls
+    needs: [test, test-custom-config]
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Finished
+      run: |
+        pip3 install -U coveralls
+        coveralls --finish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy:
     runs-on: ubuntu-latest
