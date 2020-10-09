@@ -70,7 +70,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          python -m pip install -U coverage coveralls tox tox-gh-actions
+          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
       - name: Show installed packages
         run: pip freeze
       - name: Run tests
@@ -88,8 +88,6 @@ jobs:
     name: "Tests: Custom config on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     needs: [lint, docs]
-    env:
-      TOX_ENV: custom_config
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
@@ -103,12 +101,12 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
-          python -m pip install -U coverage coveralls tox tox-gh-actions
+          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
       - name: Show installed packages
         run: pip freeze
       - name: Run tests
         run: |
-          tox
+          tox -e custom_config
           coverage xml
       - name: Upload Coverage
         run: coveralls
