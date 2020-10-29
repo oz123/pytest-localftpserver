@@ -4,7 +4,7 @@ wheel>=0.30.0
 # install requirements
 pyftpdlib==1.5.6
 PyOpenSSL==19.1.0
-pytest==6.1.1
+pytest==6.1.2
 
 # documentation
 Sphinx>=1.8
