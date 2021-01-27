@@ -77,11 +77,11 @@ jobs:
         run: |
           tox
           coverage xml
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
-        COVERALLS_PARALLEL: true
       - name: Upload Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
+          COVERALLS_PARALLEL: true
         run: coveralls --service=github
 
   test-custom-config:  # this runs the ftp server with modified environment
