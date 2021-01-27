@@ -59,7 +59,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: [3.5, 3.6, 3.7]
+        python-version: [3.7]
 
     steps:
       - uses: actions/checkout@v2
@@ -84,7 +84,7 @@ jobs:
           COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
           COVERALLS_PARALLEL: true
 
-  test-custom-config:
+  test-custom-config:  # this runs the ftp server with modified environment
     name: "Tests: Custom config on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     needs: [lint, docs]
