@@ -34,7 +34,7 @@ A PyTest plugin which provides an FTP fixture for your tests
 * Documentation: https://pytest-localftpserver.readthedocs.io/en/latest/index.html
 
 Attention!
-^^^^^^^^^^
+----------
 
 As of version ``1.0.0`` the support for python 2.7 and 3.4 was dropped.
 If you need to support those versions you should pin the version to ``0.6.0``,
@@ -45,7 +45,7 @@ i.e. add the following lines to your "requirements_dev.txt"::
 
 
 Usage Quickstart:
-^^^^^^^^^^^^^^^^^
+-----------------
 
 This Plugin provides the fixtures ``ftpserver`` and ``ftpserver_TLS``,
 which are threaded instances of a FTP server, with which you can upload files and test FTP
@@ -110,7 +110,7 @@ Sample config for Tox::
         py.test tests
 
 Credits
-^^^^^^^
+-------
 
 This package was inspired by,  https://pypi.org/project/pytest-localserver/
 made by Sebastian Rahlf, which lacks an FTP server.
@@ -119,4 +119,3 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-
