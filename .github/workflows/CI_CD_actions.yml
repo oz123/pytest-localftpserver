@@ -3,131 +3,131 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-#  lint:
-#    name: Run Quality Assurance
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Set up Python 3.7
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.7
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install -U flake8
-#      - name: Lint code
-#        run: flake8 pytest_localftpserver tests
-#
-#  docs:
-#    name: Build docs
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Set up Python 3.7
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.7
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install -U pip wheel
-#          python -m pip install . -r requirements_dev.txt
-#      - name: Build docs
-#        run: make --directory=docs clean_all html
-#
-#  docs-links:
-#    name: Check Links in docs
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Set up Python 3.7
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.7
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install -U pip wheel
-#          python -m pip install . -r requirements_dev.txt
-#      - name: Check doc links
-#        continue-on-error: true
-#        run: make --directory=docs clean_all linkcheck
-#
-#  test:
-#    name: "Tests: py${{ matrix.python-version }} on ${{ matrix.os }}"
-#    runs-on: ${{ matrix.os }}
-#    #needs: [lint, docs]
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest, macOS-latest]
-#        python-version: [3.7]
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Set up Python ${{ matrix.python-version }}
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: ${{ matrix.python-version }}
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install -U pip wheel
-#          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
-#      - name: Show installed packages
-#        run: pip freeze
-#      - name: Run tests
-#        run: |
-#          tox
-#          coverage xml
-#      - name: Upload Coverage
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
-#          COVERALLS_PARALLEL: true
-#        run: coveralls --service=github
-#
-#  test-custom-config:  # this runs the ftp server with modified environment
-#    name: "Tests: Custom config on ${{ matrix.os }}"
-#    runs-on: ${{ matrix.os }}
-#    # needs: [lint, docs]
-#    strategy:
-#      matrix:
-#        os: [ubuntu-latest, windows-latest, macOS-latest]
-#
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Set up Python 3.7
-#        uses: actions/setup-python@v2
-#        with:
-#          python-version: 3.7
-#      - name: Install dependencies
-#        run: |
-#          python -m pip install -U pip wheel
-#          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
-#      - name: Show installed packages
-#        run: pip freeze
-#      - name: Run tests
-#        run: |
-#          tox -e custom_config
-#          coverage xml
-#      - name: Upload Coverage
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          COVERALLS_FLAG_NAME: tests-custom_config-${{ matrix.python-version }}-${{ matrix.os }}
-#          COVERALLS_PARALLEL: true
-#        run: coveralls --service=github
-#
-#  coveralls:
-#    name: Finish Coveralls
-#    needs: [test, test-custom-config]
-#    runs-on: ubuntu-latest
-#    container: python:3-slim
-#    steps:
-#    - name: Finished
-#      run: |
-#        pip3 install -U coveralls
-#        coveralls --finish --service=github
-#      env:
-#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-#
+  lint:
+    name: Run Quality Assurance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U flake8
+      - name: Lint code
+        run: flake8 pytest_localftpserver tests
+
+  docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Build docs
+        run: make --directory=docs clean_all html
+
+  docs-links:
+    name: Check Links in docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Check doc links
+        continue-on-error: true
+        run: make --directory=docs clean_all linkcheck
+
+  test:
+    name: "Tests: py${{ matrix.python-version }} on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    #needs: [lint, docs]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+        python-version: [3.7]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
+      - name: Show installed packages
+        run: pip freeze
+      - name: Run tests
+        run: |
+          tox
+          coverage xml
+      - name: Upload Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tests-${{ matrix.python-version }}-${{ matrix.os }}
+          COVERALLS_PARALLEL: true
+        run: coveralls --service=github
+
+  test-custom-config:  # this runs the ftp server with modified environment
+    name: "Tests: Custom config on ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    # needs: [lint, docs]
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macOS-latest]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install -U coverage coveralls tox "tox-gh-actions>2"
+      - name: Show installed packages
+        run: pip freeze
+      - name: Run tests
+        run: |
+          tox -e custom_config
+          coverage xml
+      - name: Upload Coverage
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: tests-custom_config-${{ matrix.python-version }}-${{ matrix.os }}
+          COVERALLS_PARALLEL: true
+        run: coveralls --service=github
+
+  coveralls:
+    name: Finish Coveralls
+    needs: [test, test-custom-config]
+    runs-on: ubuntu-latest
+    container: python:3-slim
+    steps:
+    - name: Finished
+      run: |
+        pip3 install -U coveralls
+        coveralls --finish --service=github
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+
   build-n-publish:
     name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
