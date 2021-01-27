@@ -3,53 +3,53 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  #lint:
-  #  name: Run Quality Assurance
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #    - name: Set up Python 3.7
-  #      uses: actions/setup-python@v2
-  #      with:
-  #        python-version: 3.7
-  #    - name: Install dependencies
-  #      run: |
-  #        python -m pip install -U flake8
-  #    - name: Lint code
-  #      run: flake8 pytest_localftpserver tests
+  lint:
+    name: Run Quality Assurance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U flake8
+      - name: Lint code
+        run: flake8 pytest_localftpserver tests
 
-  #docs:
-  #  name: Build docs
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #    - name: Set up Python 3.7
-  #      uses: actions/setup-python@v2
-  #      with:
-  #        python-version: 3.7
-  #    - name: Install dependencies
-  #      run: |
-  #        python -m pip install -U pip wheel
-  #        python -m pip install . -r requirements_dev.txt
-  #    - name: Build docs
-  #      run: make --directory=docs clean_all html
+  docs:
+    name: Build docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Build docs
+        run: make --directory=docs clean_all html
 
-  #docs-links:
-  #  name: Check Links in docs
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - uses: actions/checkout@v2
-  #    - name: Set up Python 3.7
-  #      uses: actions/setup-python@v2
-  #      with:
-  #        python-version: 3.7
-  #    - name: Install dependencies
-  #      run: |
-  #        python -m pip install -U pip wheel
-  #        python -m pip install . -r requirements_dev.txt
-  #    - name: Check doc links
-  #      continue-on-error: true
-  #      run: make --directory=docs clean_all linkcheck
+  docs-links:
+    name: Check Links in docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install -U pip wheel
+          python -m pip install . -r requirements_dev.txt
+      - name: Check doc links
+        continue-on-error: true
+        run: make --directory=docs clean_all linkcheck
 
 
   test:
