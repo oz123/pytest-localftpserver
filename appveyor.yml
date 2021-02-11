@@ -2,12 +2,12 @@ build: false
 
 environment:
   matrix:
-    - PYTHON: "C:/Python37"
+    - PYTHON: "C:/Python36"
 
 
 init:
   - "ECHO %PYTHON%"
-  - ps: "ls C:/Python37"
+  - ps: "ls C:/Python*"
 
 install:
   - "%PYTHON%/Scripts/pip.exe install wheel tox"
@@ -16,4 +16,5 @@ install:
   - "%PYTHON%/Scripts/pip.exe install -e ."
 
 test_script:
-  - "%PYTHON%/python.exe -m pytest"
+  - "%PYTHON%/Scripts/tox.exe -e py37"
+
