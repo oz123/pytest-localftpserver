@@ -1,0 +1,22 @@
+build: false
+
+environment:
+  matrix:
+    - PYTHON: "C:/Python36"
+    - PYTHON: "C:/Python37"
+    - PYTHON: "C:/Python38"
+
+
+init:
+  - "ECHO %PYTHON%"
+  - ps: "ls C:/Python*"
+
+install:
+  - "%PYTHON%/Scripts/pip.exe install wheel tox"
+  - "%PYTHON%/Scripts/pip.exe install cryptography --only-binary=:all:"
+  - "%PYTHON%/Scripts/pip.exe install -r requirements_dev.txt"
+  - "%PYTHON%/Scripts/pip.exe install -e ."
+
+test_script:
+  - "%PYTHON%/Scripts/tox.exe -e py37"
+
