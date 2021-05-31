@@ -1089,7 +1089,7 @@ class ThreadFTPServer(FunctionalityWrapper):
         # The server needs to run in a separate thread or it will block all tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
-        self.thread.deamon = True
+        self.thread.daemon = True
         self.thread.start()
 
     def stop(self):
@@ -1108,7 +1108,7 @@ class ProcessFTPServer(FunctionalityWrapper):
         # The server needs to run in a separate process or it will block all tests
         self.process = multiprocessing.Process(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
-        self.process.deamon = True
+        self.process.daemon = True
         self.process.start()
 
     def stop(self):
