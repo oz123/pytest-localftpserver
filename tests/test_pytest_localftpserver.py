@@ -728,3 +728,30 @@ def test_fail_due_to_closed_module_scope(ftpserver):
     ftp = FTP()
     with pytest.raises(Exception):
         ftp.connect("localhost", port=ftpserver.server_port)
+
+
+def test_multiple_servers():
+    """Interact with multiple servers at a time.
+
+    This shouldn't cause a 'ftplib.error_perm: 530 Authentication failed.' anymore.
+    See issue #137
+    """
+    server1 = PytestLocalFTPServer(
+        username="user1", password="pass1", ftp_home=None, ftp_port=34445
+    )
+    server2 = PytestLocalFTPServer(
+        username="user2", password="pass2", ftp_home=None, ftp_port=34446
+    )
+
+    ftp1 = FTP()
+    ftp1.connect("localhost", 34445)
+    ftp1.login("user1", "pass1")
+    close_client(ftp1)
+
+    ftp2 = FTP()
+    ftp2.connect("localhost", 34446)
+    ftp2.login("user2", "pass2")
+    close_client(ftp2)
+
+    server1.stop()
+    server2.stop()
