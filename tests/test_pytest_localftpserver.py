@@ -116,14 +116,14 @@ def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable
     else:
         base_path = ftp_fixture.server_home
     ftp = ftp_login(ftp_fixture, anon=anon, use_TLS=use_TLS)
-    download_dir = tmpdir.mkdir("download_rel_path")
+    download_dir = tmpdir.ensure("download_url", dir=True)
     for file_path in path_iterable:
         abs_file_path = os.path.abspath(os.path.join(base_path, file_path))
         assert os.path.isfile(abs_file_path)
         assert file_path in files_on_server
         dirs, filename = os.path.split(file_path)
         if dirs != "":
-            download_file = download_dir.mkdir(dirs).join(filename)
+            download_file = download_dir.ensure(dirs, dir=True).join(filename)
         else:
             download_file = download_dir.join(filename)
         with open(str(download_file), "wb") as f:
@@ -131,7 +131,7 @@ def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable
         with open(str(download_file), "r") as f:
             assert f.read() == filename
     close_client(ftp)
-    download_dir.remove()
+    download_dir.remove(ignore_errors=True)
 
 
 def check_files_by_urls(tmpdir, base_url, url_iterable):
@@ -149,14 +149,14 @@ def check_files_by_urls(tmpdir, base_url, url_iterable):
         Contains urls to check
     """
     # checking files by url
-    download_dir = tmpdir.mkdir("download_url")
+    download_dir = tmpdir.ensure("download_url", dir=True)
     for url in url_iterable:
         _, filename = os.path.split(os.path.relpath(url, base_url))
         download_file = download_dir.join(filename)
         wget.download(url, str(download_file))
         with open(str(download_file), "r") as f:
             assert f.read() == filename
-    download_dir.remove()
+    download_dir.remove(ignore_errors=True)
 
 
 def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,

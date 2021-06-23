@@ -33,6 +33,19 @@ class WrongFixtureError(Exception):
     pass
 
 
+def create_ftp_handler():
+    """
+    Create on the fly Handler class inside of a closure.
+
+    This prevents the authorizer to ve overwritten on a class variable level.
+    Ref:
+    https://github.com/giampaolo/pyftpdlib/issues/454
+    """
+    class FTPHandlerMulti(FTPHandler):
+        pass
+    return FTPHandlerMulti
+
+
 class SimpleFTPServer(FTPServer):
     """
     Starts a simple FTP server.
@@ -83,7 +96,7 @@ class SimpleFTPServer(FTPServer):
             handler.certfile = certfile
             validate_cert_file(certfile)
         else:
-            handler = FTPHandler
+            handler = create_ftp_handler()
 
         socket, self._ftp_port = get_socket(ftp_port)
 
@@ -91,7 +104,7 @@ class SimpleFTPServer(FTPServer):
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, socket, handler)
+        super().__init__(socket, handler)
 
     def stop(self):
         """
