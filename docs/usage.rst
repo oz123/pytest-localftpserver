@@ -313,9 +313,11 @@ The configuration of pytest-env is done in the ``pytest.ini`` file.
 The following example configuration will use the username ``benz``, the password ``erni1``,
 the ftp port ``31175`` and the home folder ``/home/ftp_test``.
 For the encrypted version of the fixture it uses port ``31176``, the home folder ``/home/ftp_test`` and
-the certificate ``./tests/test_keycert.pem``::
+the certificate ``./tests/test_keycert.pem``
 
-    $ cat pytest.ini
+.. code-block:: ini
+    :caption: pytest.ini
+
     [pytest]
     env =
         FTP_USER=benz
@@ -338,9 +340,11 @@ python 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
 the tempfolder of each virtual environment the tests are run in (``{envtmpdir}``) and
 the ftp port ``31175``.
 For the encrypted version of the fixture it uses port ``31176`` and the certificate
-``{toxinidir}/tests/test_keycert.pem``::
+``{toxinidir}/tests/test_keycert.pem``
 
-    $ cat tox.ini
+.. code-block:: ini
+    :caption: tox.ini
+
     [tox]
     envlist = py{35,36,37}
 
@@ -358,3 +362,53 @@ For the encrypted version of the fixture it uses port ``31176`` and the certific
     commands =
         py.test tests
 
+Using multiple FTP servers
+==========================
+
+If you need multiple instances of an FTP server for testing
+(e.g. your code transfers data from one server to another)
+you can create an additional fixture.
+
+
+.. code-block:: python
+    :caption: tests/test_ftp_copy.py
+
+    import pytest
+
+    from pytest_localftpserver.servers import PytestLocalFTPServer
+
+    from mypackage import ftp_copy
+
+
+    @pytest.fixture()
+    def target_ftpserver():
+        """Target FTP server fixture with out TSL."""
+        server = PytestLocalFTPServer(username="target_user", password="target_password")
+        yield server
+        server.stop()
+
+
+    @pytest.fixture()
+    def target_ftpserver_TLS():
+        """Target FTP server fixture with TSL."""
+        server = PytestLocalFTPServer(
+            username="target_user", password="target_password", use_TLS=True
+        )
+        yield server
+        server.stop()
+
+
+    def test_ftp_copy(
+        ftpserver: PytestLocalFTPServer, target_ftpserver: PytestLocalFTPServer
+    ):
+        """Copy from one server to another."""
+        ftpserver.put_files(
+            ["test_folder/test_file1", "test_folder/test_file2"], anon=False
+        )
+        print(list(ftpserver.get_file_contents()))
+
+        ftp_copy(ftpserver.get_login_data(), target_ftpserver.get_login_data())
+
+        assert list(ftpserver.get_file_contents()) == list(
+            target_ftpserver.get_file_contents()
+        )
