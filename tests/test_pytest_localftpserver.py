@@ -737,19 +737,19 @@ def test_multiple_servers():
     See issue #137
     """
     server1 = PytestLocalFTPServer(
-        username="user1", password="pass1", ftp_home=None, ftp_port=34445
+        username="user1", password="pass1", ftp_home=None, ftp_port=0
     )
     server2 = PytestLocalFTPServer(
-        username="user2", password="pass2", ftp_home=None, ftp_port=34446
+        username="user2", password="pass2", ftp_home=None, ftp_port=0
     )
 
     ftp1 = FTP()
-    ftp1.connect("localhost", 34445)
+    ftp1.connect("localhost", server1._server._ftp_port)
     ftp1.login("user1", "pass1")
     close_client(ftp1)
 
     ftp2 = FTP()
-    ftp2.connect("localhost", 34446)
+    ftp2.connect("localhost", server2._server._ftp_port)
     ftp2.login("user2", "pass2")
     close_client(ftp2)
 
