@@ -33,7 +33,7 @@ class WrongFixtureError(Exception):
     pass
 
 
-def create_ftp_handler():
+def create_ftp_handler(use_TLS=False):
     """
     Create on the fly Handler class inside of a closure.
 
@@ -41,9 +41,18 @@ def create_ftp_handler():
     Ref:
     https://github.com/giampaolo/pyftpdlib/issues/454
     """
-    class FTPHandlerMulti(FTPHandler):
-        pass
-    return FTPHandlerMulti
+    if use_TLS:
+
+        class FTPHandlerTLSMulti(TLS_FTPHandler):
+            pass
+
+        return FTPHandlerTLSMulti
+    else:
+
+        class FTPHandlerMulti(FTPHandler):
+            pass
+
+        return FTPHandlerMulti
 
 
 class SimpleFTPServer(FTPServer):
@@ -92,11 +101,11 @@ class SimpleFTPServer(FTPServer):
         self._cert_path = certfile
 
         if use_TLS:
-            handler = TLS_FTPHandler
+            handler = create_ftp_handler(use_TLS=True)
             handler.certfile = certfile
             validate_cert_file(certfile)
         else:
-            handler = create_ftp_handler()
+            handler = create_ftp_handler(use_TLS=False)
 
         socket, self._ftp_port = get_socket(ftp_port)
 

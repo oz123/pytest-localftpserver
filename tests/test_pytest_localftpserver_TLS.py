@@ -10,7 +10,7 @@ Tests for `pytest_localftpserver` module.
 
 import os
 
-from ftplib import error_perm
+from ftplib import error_perm, FTP
 import pytest
 
 
@@ -20,6 +20,7 @@ from .test_pytest_localftpserver import (ftp_login,
                                          FILE_LIST)
 
 from pytest_localftpserver.servers import (SimpleFTPServer,
+                                           PytestLocalFTPServer,
                                            WrongFixtureError,
                                            DEFAULT_CERTFILE)
 
@@ -150,3 +151,30 @@ def test_wrong_cert_exception():
                                               "not_a_valid_cert.pem"))
     with pytest.raises(InvalidCertificateError):
         SimpleFTPServer(use_TLS=True, certfile=wrong_cert)
+
+
+def test_multiple_servers_TLS():
+    """Interact with multiple TLS servers at a time.
+
+    This shouldn't cause a 'ftplib.error_perm: 530 Authentication failed.' anymore.
+    See issue #137
+    """
+    server1 = PytestLocalFTPServer(
+        username="user1", password="pass1", ftp_home=None, ftp_port=34445, use_TLS=True
+    )
+    server2 = PytestLocalFTPServer(
+        username="user2", password="pass2", ftp_home=None, ftp_port=34446, use_TLS=True
+    )
+
+    ftp1 = FTP()
+    ftp1.connect("localhost", 34445)
+    ftp1.login("user1", "pass1")
+    close_client(ftp1)
+
+    ftp2 = FTP()
+    ftp2.connect("localhost", 34446)
+    ftp2.login("user2", "pass2")
+    close_client(ftp2)
+
+    server1.stop()
+    server2.stop()
