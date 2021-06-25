@@ -369,6 +369,10 @@ If you need multiple instances of an FTP server for testing
 (e.g. your code transfers data from one server to another)
 you can create an additional fixture.
 
+.. note::
+
+    Currently multiple TLS servers are only supported on Linux.
+
 
 .. code-block:: python
     :caption: tests/test_ftp_copy.py

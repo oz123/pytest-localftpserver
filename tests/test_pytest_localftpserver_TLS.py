@@ -9,6 +9,7 @@ Tests for `pytest_localftpserver` module.
 """
 
 import os
+import sys
 
 from ftplib import error_perm, FTP_TLS
 import pytest
@@ -154,6 +155,10 @@ def test_wrong_cert_exception():
         SimpleFTPServer(use_TLS=True, certfile=wrong_cert)
 
 
+@pytest.mark.skipif(
+    sys.platform != 'linux',
+    reason="Currently thread based servers TLS cause Segfault"
+)
 def test_multiple_servers_TLS():
     """Interact with multiple TLS servers at a time.
 
