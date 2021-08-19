@@ -9,9 +9,11 @@ Tests for `pytest_localftpserver` module.
 """
 
 import os
+import sys
 
-from ftplib import error_perm
+from ftplib import error_perm, FTP_TLS
 import pytest
+from ssl import SSLContext, PROTOCOL_TLS
 
 
 from .test_pytest_localftpserver import (ftp_login,
@@ -20,6 +22,7 @@ from .test_pytest_localftpserver import (ftp_login,
                                          FILE_LIST)
 
 from pytest_localftpserver.servers import (SimpleFTPServer,
+                                           PytestLocalFTPServer,
                                            WrongFixtureError,
                                            DEFAULT_CERTFILE)
 
@@ -150,3 +153,38 @@ def test_wrong_cert_exception():
                                               "not_a_valid_cert.pem"))
     with pytest.raises(InvalidCertificateError):
         SimpleFTPServer(use_TLS=True, certfile=wrong_cert)
+
+
+@pytest.mark.skipif(
+    sys.platform != 'linux',
+    reason="Currently thread based servers TLS cause Segfault"
+)
+def test_multiple_servers_TLS():
+    """Interact with multiple TLS servers at a time.
+
+    This shouldn't cause a 'ftplib.error_perm: 530 Authentication failed.' anymore.
+    See issue #137
+    """
+    server1 = PytestLocalFTPServer(
+        username="user1", password="pass1", ftp_home=None, ftp_port=0, use_TLS=True
+    )
+    server2 = PytestLocalFTPServer(
+        username="user2", password="pass2", ftp_home=None, ftp_port=0, use_TLS=True
+    )
+    ssl_context = SSLContext(PROTOCOL_TLS)
+    ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
+
+    ftp1 = FTP_TLS(context=ssl_context)
+    ftp1.connect("localhost", server1._server._ftp_port)
+    ftp1.login("user1", "pass1")
+    ftp1.prot_p()
+    close_client(ftp1)
+
+    ftp2 = FTP_TLS(context=ssl_context)
+    ftp2.connect("localhost", server2._server._ftp_port)
+    ftp2.login("user2", "pass2")
+    ftp2.prot_p()
+    close_client(ftp2)
+
+    server1.stop()
+    server2.stop()

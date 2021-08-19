@@ -33,6 +33,28 @@ class WrongFixtureError(Exception):
     pass
 
 
+def create_ftp_handler(use_TLS=False):
+    """
+    Create on the fly Handler class inside of a closure.
+
+    This prevents the authorizer to ve overwritten on a class variable level.
+    Ref:
+    https://github.com/giampaolo/pyftpdlib/issues/454
+    """
+    if use_TLS:
+
+        class FTPHandlerTLSMulti(TLS_FTPHandler):
+            pass
+
+        return FTPHandlerTLSMulti
+    else:
+
+        class FTPHandlerMulti(FTPHandler):
+            pass
+
+        return FTPHandlerMulti
+
+
 class SimpleFTPServer(FTPServer):
     """
     Starts a simple FTP server.
@@ -79,11 +101,11 @@ class SimpleFTPServer(FTPServer):
         self._cert_path = certfile
 
         if use_TLS:
-            handler = TLS_FTPHandler
+            handler = create_ftp_handler(use_TLS=True)
             handler.certfile = certfile
             validate_cert_file(certfile)
         else:
-            handler = FTPHandler
+            handler = create_ftp_handler(use_TLS=False)
 
         socket, self._ftp_port = get_socket(ftp_port)
 
@@ -91,7 +113,7 @@ class SimpleFTPServer(FTPServer):
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, socket, handler)
+        super().__init__(socket, handler)
 
     def stop(self):
         """
@@ -125,16 +147,27 @@ class SimpleFTPServer(FTPServer):
                 os.makedirs(self._ftp_home)
 
 
-class FunctionalityWrapper(object):
+class FunctionalityWrapper:
     """
     Baseclass which holds the functionality of ftpserver.
     The derived classes are ThreadFTPServer and ProcessFTPServer, which
     (depending on the OS) are the classes of the ftpserver instance.
 
+
     Parameters
     ----------
+    username: str
+        Name of the registered user.
+    password: str
+        Password of the registered user.
+    ftp_home: str
+        Local path to FTP home for the registered user.
+    ftp_port: int
+        Desired port for the server to listen to.
     use_TLS: bool
         Whether or not to use TLS/SSL encryption.
+    certfile: str, Path
+        Path to the certificate file.
 
     Notes
     -----
@@ -164,9 +197,23 @@ class FunctionalityWrapper(object):
             Path to the certificate used by the encrypted server.
 
     """
-    def __init__(self, use_TLS=False):
-        env_dict = get_env_dict(use_TLS=use_TLS)
-        self._server = SimpleFTPServer(use_TLS=use_TLS, **env_dict)
+    def __init__(
+        self,
+        username="fakeusername",
+        password="qweqwe",
+        ftp_home=None,
+        ftp_port=0,
+        use_TLS=False,
+        certfile=DEFAULT_CERTFILE,
+    ):
+        self._server = SimpleFTPServer(
+            username=username,
+            password=password,
+            ftp_home=ftp_home,
+            ftp_port=ftp_port,
+            use_TLS=use_TLS,
+            certfile=certfile,
+        )
 
     @property
     def username(self):
@@ -1084,8 +1131,30 @@ class ThreadFTPServer(FunctionalityWrapper):
     (Windows and OSX).
     To learn about the functionality check out BaseMPFTPServer.
     """
-    def __init__(self, use_TLS=False):
-        super(ThreadFTPServer, self).__init__(use_TLS=use_TLS)
+
+    def __init__(self, use_TLS=False, **kwargs):
+        """
+        Initialize and start a FTPServer in a separate Thread.
+
+        Parameters
+        ----------
+        use_TLS: bool
+            Whether or not to use TLS/SSL encryption.
+        kwargs:
+            username: str
+                Name of the registered user.
+            password: str
+                Password of the registered user.
+            ftp_home: str
+                Local path to FTP home for the registered user.
+            ftp_port: int
+                Desired port for the server to listen to.
+            certfile: str, Path
+                Path to the certificate file.
+        """
+        env_dict = get_env_dict(use_TLS=use_TLS)
+        settings_dict = {**env_dict, **kwargs, "use_TLS": use_TLS}
+        super().__init__(**settings_dict)
         # The server needs to run in a separate thread or it will block all tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1093,7 +1162,7 @@ class ThreadFTPServer(FunctionalityWrapper):
         self.thread.start()
 
     def stop(self):
-        super(ThreadFTPServer, self).stop()
+        super().stop()
         self.thread.join()
 
 
@@ -1103,8 +1172,29 @@ class ProcessFTPServer(FunctionalityWrapper):
     (Linux).
     To learn about the functionality check out BaseMPFTPServer.
     """
-    def __init__(self, use_TLS=False):
-        super(ProcessFTPServer, self).__init__(use_TLS=use_TLS)
+
+    def __init__(self, use_TLS=False, **kwargs):
+        """
+        Initialize and start a FTPServer in a separate Process.
+
+        Parameters
+        ----------
+        use_TLS: bool
+            Whether or not to use TLS/SSL encryption.
+        kwargs:
+            username: str
+                Name of the registered user.
+            password: str
+                Password of the registered user.
+            ftp_home: str
+                Local path to FTP home for the registered user.
+            ftp_port: int
+                Desired port for the server to listen to.
+            certfile: str, Path
+                Path to the certificate file.
+        """
+        env_dict = get_env_dict(use_TLS=use_TLS)
+        super().__init__(**{**env_dict, **kwargs, "use_TLS": use_TLS})
         # The server needs to run in a separate process or it will block all tests
         self.process = multiprocessing.Process(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1112,7 +1202,7 @@ class ProcessFTPServer(FunctionalityWrapper):
         self.process.start()
 
     def stop(self):
-        super(ProcessFTPServer, self).stop()
+        super().stop()
         self.process.terminate()
 
 
