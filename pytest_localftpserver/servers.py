@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import collections
+from collections.abc import Iterable
 from functools import wraps
 import multiprocessing
 import os
@@ -641,12 +641,12 @@ class FunctionalityWrapper(object):
             "rel_file_paths":
                 {'valid_types': [type(None),
                                  str,
-                                 collections.Iterable]}
+                                 Iterable]}
         },
         strict_type_check=False)
     # if you use dev_mode=True here you will get a warning that `rel_file_paths`, isn't in
     # `valid_var_list` this is on purpose, since `rel_file_paths` gets checked with
-    # `strict_type_check=False` to be able to check `collections.Iterable`
+    # `strict_type_check=False` to be able to check `collections.abc.Iterable`
     @_option_validator(dev_mode=False)
     def get_file_contents(self, rel_file_paths=None, style="rel_path",
                           anon=False, read_mode="r"):
@@ -742,7 +742,7 @@ class FunctionalityWrapper(object):
         base_path = self.get_local_base_path(anon=anon)
         if not rel_file_paths:
             rel_file_paths = self.get_file_paths(style=style, anon=anon)
-        if isinstance(rel_file_paths, str) or not isinstance(rel_file_paths, collections.Iterable):
+        if isinstance(rel_file_paths, str) or not isinstance(rel_file_paths, Iterable):
             rel_file_paths = [rel_file_paths]
         for rel_file_path in rel_file_paths:
             if "ftp://" in rel_file_path:
@@ -904,7 +904,7 @@ class FunctionalityWrapper(object):
         """
 
         is_str_or_dict = isinstance(files_on_local, (str, dict))
-        if is_str_or_dict or not isinstance(files_on_local, collections.Iterable):
+        if is_str_or_dict or not isinstance(files_on_local, Iterable):
             files_on_local = [files_on_local]
 
         base_path = self.get_local_base_path(anon=anon)
