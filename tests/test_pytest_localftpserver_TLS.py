@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 test_pytest_localftpserver
@@ -64,7 +63,7 @@ def test_file_upload_user(ftpserver_TLS, tmpdir):
     assert os.path.isdir(os.path.join(ftpserver_TLS.server_home, "FOO"))
     abs_file_path_server = os.path.join(ftpserver_TLS.server_home, "FOO", filename)
     assert os.path.isfile(abs_file_path_server)
-    with open(abs_file_path_server, "r") as f:
+    with open(abs_file_path_server) as f:
         assert f.read() == "test"
 
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 from collections.abc import Iterable
 import logging
@@ -115,8 +114,7 @@ def test_arg_validator():
 
     # test type validation not strict
     def test_generator_func():
-        for item in [1, 2]:
-            yield item
+        yield from [1, 2]
 
     test_generator = test_generator_func()
 

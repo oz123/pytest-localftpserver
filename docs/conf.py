@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # pytest_localftpserver documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  9 22:26:36 2013.
@@ -66,8 +65,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyTest local FTP Server'
-copyright = u"2016, Oz Tiram"
+project = 'PyTest local FTP Server'
+copyright = "2016, Oz Tiram"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -229,8 +228,8 @@ latex_elements = {
 # [howto/manual]).
 latex_documents = [
     ('index', 'pytest_localftpserver.tex',
-     u'PyTest local FTP Server Documentation',
-     u'Oz Tiram', 'manual'),
+     'PyTest local FTP Server Documentation',
+     'Oz Tiram', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at
@@ -260,8 +259,8 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'pytest_localftpserver',
-     u'PyTest local FTP Server Documentation',
-     [u'Oz Tiram'], 1)
+     'PyTest local FTP Server Documentation',
+     ['Oz Tiram'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -275,8 +274,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     ('index', 'pytest_localftpserver',
-     u'PyTest local FTP Server Documentation',
-     u'Oz Tiram',
+     'PyTest local FTP Server Documentation',
+     'Oz Tiram',
      'pytest_localftpserver',
      'One line description of project.',
      'Miscellaneous'),

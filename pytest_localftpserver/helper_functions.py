@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import print_function, absolute_import
-
 from copy import deepcopy
 import logging
 import os
@@ -173,7 +170,7 @@ def arg_validator_excepthook(exc_type, exc_value, exc_traceback):
     # since the excepthook will be caught by pytest there is no reason to
     # run it trought coverage
     print_tb(exc_traceback, limit=1, file=sys.stderr)  # pragma: no cover
-    print("{}: {}".format(exc_type.__name__, exc_value), file=sys.stderr)  # pragma: no cover
+    print(f"{exc_type.__name__}: {exc_value}", file=sys.stderr)  # pragma: no cover
 
 
 def arg_validator(func_locals, valid_var_dict, valid_var_overwrite=None,
@@ -293,7 +290,7 @@ def arg_validator(func_locals, valid_var_dict, valid_var_overwrite=None,
                         msg_dict["type_string"] = "``{}``" \
                                                   "".format(valid_types[0].__name__)
                     else:
-                        valid_type_list = ["``{}``".format(valid_type.__name__)
+                        valid_type_list = [f"``{valid_type.__name__}``"
                                            for valid_type in valid_types[:-1]]
                         base_str = ", ".join(valid_type_list)
                         msg_dict["type_string"] = "{} or ``{}``" \

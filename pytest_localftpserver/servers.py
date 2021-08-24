@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from collections.abc import Iterable
 from functools import wraps
 import multiprocessing
@@ -125,7 +123,7 @@ class SimpleFTPServer(FTPServer):
                 os.makedirs(self._ftp_home)
 
 
-class FunctionalityWrapper(object):
+class FunctionalityWrapper:
     """
     Baseclass which holds the functionality of ftpserver.
     The derived classes are ThreadFTPServer and ProcessFTPServer, which
@@ -286,7 +284,7 @@ class FunctionalityWrapper(object):
                     heading = f.__name__.upper()
                     msg_line = []
                     for key in sorted(func_locals):
-                        msg_line.append("'{}': {}".format(key, func_locals[key]))
+                        msg_line.append(f"'{key}': {func_locals[key]}")
                     msg = "\n".join(msg_line)
                     pretty_logger(heading, "FUNC_LOCALS\n"+msg+"\n\n")
                 try:
@@ -1085,7 +1083,7 @@ class ThreadFTPServer(FunctionalityWrapper):
     To learn about the functionality check out BaseMPFTPServer.
     """
     def __init__(self, use_TLS=False):
-        super(ThreadFTPServer, self).__init__(use_TLS=use_TLS)
+        super().__init__(use_TLS=use_TLS)
         # The server needs to run in a separate thread or it will block all tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1093,7 +1091,7 @@ class ThreadFTPServer(FunctionalityWrapper):
         self.thread.start()
 
     def stop(self):
-        super(ThreadFTPServer, self).stop()
+        super().stop()
         self.thread.join()
 
 
@@ -1104,7 +1102,7 @@ class ProcessFTPServer(FunctionalityWrapper):
     To learn about the functionality check out BaseMPFTPServer.
     """
     def __init__(self, use_TLS=False):
-        super(ProcessFTPServer, self).__init__(use_TLS=use_TLS)
+        super().__init__(use_TLS=use_TLS)
         # The server needs to run in a separate process or it will block all tests
         self.process = multiprocessing.Process(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
@@ -1112,7 +1110,7 @@ class ProcessFTPServer(FunctionalityWrapper):
         self.process.start()
 
     def stop(self):
-        super(ProcessFTPServer, self).stop()
+        super().stop()
         self.process.terminate()
 
 
