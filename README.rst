@@ -107,7 +107,7 @@ Sample config for Tox::
         FTP_HOME_TLS = /home/ftp_test_TLS
         FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
     commands =
-        py.test tests
+        pytest tests
 
 Credits
 -------

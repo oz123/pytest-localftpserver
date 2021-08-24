@@ -111,7 +111,7 @@ Tips
 
 To run a subset of tests::
 
-    $ py.test tests/test_pytest_localftpserver.py::<test_name>
+    $ pytest tests/test_pytest_localftpserver.py::<test_name>
 
 
 Deploying
