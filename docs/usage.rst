@@ -346,5 +346,5 @@ For the encrypted version of the fixture it uses port ``31176`` and the certific
         FTP_HOME_TLS = /home/ftp_test_TLS
         FTP_CERTFILE = {toxinidir}/tests/test_keycert.pem
     commands =
-        py.test tests
+        pytest tests
 
