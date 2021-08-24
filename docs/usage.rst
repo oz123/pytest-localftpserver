@@ -56,31 +56,21 @@ An other common use case would be retrieving a file from a FTP-server.
 Login with the TLS server
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Since Python 2 and 3, as well as different versions of python 3 differ in their implementation of the
-client ``FTP_TLS`` and/or ssl protocol/context, we provide you with an example which works on
-python 2.7, 3.4, 3.5 3.6 and 3.7
-(note that, this example utilizes methods of the the high-level interface, which are  explained in
-:ref:`get_login_data` and :ref:`get_file_contents`).
+Tthis example utilizes methods of the the high-level interface, which are  explained in
+:ref:`get_login_data` and :ref:`get_file_contents`.
 
 The below example test logs into the TLS ftpserver, creates the file ``testfile.txt``, with content 'test text' and
 checks if it was written properly.
 
 .. code-block:: python
 
-    import sys
     from ftplib import FTP_TLS
 
-    if sys.version_info[0] == 3:
-        PYTHON3 = True
-    else:
-        PYTHON3 = False
-
-    if PYTHON3:
-        from ssl import SSLContext
-        try:
-            from ssl import PROTOCOL_TLS
-        except Exception:
-            from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
+    from ssl import SSLContext
+    try:
+        from ssl import PROTOCOL_TLS
+    except Exception:
+        from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
 
 
     def test_TLS_login(ftpserver_TLS):
@@ -303,7 +293,7 @@ You can either set environment variables on a system level or use tools such as
            (``FTP_PORT``/ ``FTP_PORT_TLS``).
            This is due to the server still listening on that port, which prevents it from adding another listener
            on that port. When using pythons buildin ``ftplib``, you should use the
-           `quit method <https://docs.python.org/3.7/library/ftplib.html#ftplib.FTP.quit>`_
+           `quit method <https://docs.python.org/3/library/ftplib.html#ftplib.FTP.quit>`_
            to terminate the connection, since it's the `'the “polite” way to close a connection'` and lets the
            server know that the client isn't just experiencing connection problems, but won't come back.
 
@@ -334,7 +324,7 @@ Configuration with Tox
 
 The configuration of tox is done in the ``tox.ini`` file.
 The following example configuration will run the tests in the folder ``tests`` on
-python 3.5, 3.6 and 3.7 and use the username ``benz``, the password ``erni1``,
+python 3.6+ and use the username ``benz``, the password ``erni1``,
 the tempfolder of each virtual environment the tests are run in (``{envtmpdir}``) and
 the ftp port ``31175``.
 For the encrypted version of the fixture it uses port ``31176`` and the certificate
@@ -342,7 +332,7 @@ For the encrypted version of the fixture it uses port ``31176`` and the certific
 
     $ cat tox.ini
     [tox]
-    envlist = py{35,36,37}
+    envlist = py{36,37,38,39,310}
 
     [testenv]
     setenv =
