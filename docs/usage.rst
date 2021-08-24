@@ -56,7 +56,7 @@ An other common use case would be retrieving a file from a FTP-server.
 Login with the TLS server
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Tthis example utilizes methods of the the high-level interface, which are  explained in
+This example utilizes methods of the the high-level interface, which are  explained in
 :ref:`get_login_data` and :ref:`get_file_contents`.
 
 The below example test logs into the TLS ftpserver, creates the file ``testfile.txt``, with content 'test text' and
