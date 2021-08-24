@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install -U flake8
@@ -23,10 +23,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
@@ -39,10 +39,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
@@ -56,9 +56,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     #needs: [lint, docs]
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        python-version: [3.7]
+        python-version: ["3.6", "3.7", "3.8", "3.9"]
 
     steps:
       - uses: actions/checkout@v2
@@ -93,10 +94,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python 3.7
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install -U pip wheel
@@ -133,10 +134,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
-    - name: Set up Python 3.7
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
-        python-version: 3.7
+        python-version: 3.9
     - name: Install pypa/build
       run: |
         python -m pip install build --user
