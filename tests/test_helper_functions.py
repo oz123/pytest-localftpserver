@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from collections import Iterable
+from collections.abc import Iterable
 import logging
 import os
 import socket
