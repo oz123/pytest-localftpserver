@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
 test_pytest_localftpserver
@@ -128,7 +127,7 @@ def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable
             download_file = download_dir.join(filename)
         with open(str(download_file), "wb") as f:
             ftp.retrbinary("RETR "+file_path, f.write)
-        with open(str(download_file), "r") as f:
+        with open(str(download_file)) as f:
             assert f.read() == filename
     close_client(ftp)
     download_dir.remove()
@@ -154,7 +153,7 @@ def check_files_by_urls(tmpdir, base_url, url_iterable):
         _, filename = os.path.split(os.path.relpath(url, base_url))
         download_file = download_dir.join(filename)
         wget.download(url, str(download_file))
-        with open(str(download_file), "r") as f:
+        with open(str(download_file)) as f:
             assert f.read() == filename
     download_dir.remove()
 
@@ -345,7 +344,7 @@ def test_file_upload_user(ftpserver, tmpdir):
     assert os.path.isdir(os.path.join(ftpserver.server_home, "FOO"))
     abs_file_path_server = os.path.join(ftpserver.server_home, "FOO", filename)
     assert os.path.isfile(abs_file_path_server)
-    with open(abs_file_path_server, "r") as f:
+    with open(abs_file_path_server) as f:
         assert f.read() == "test"
 
 
