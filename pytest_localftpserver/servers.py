@@ -13,13 +13,15 @@ from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler, TLS_FTPHandler
 from pyftpdlib.servers import FTPServer
 
-from pytest_localftpserver.helper_functions import (get_socket,
-                                                    get_env_dict,
-                                                    validate_cert_file,
-                                                    arg_validator,
-                                                    arg_validator_excepthook,
-                                                    pretty_logger,
-                                                    DEFAULT_CERTFILE)
+from pytest_localftpserver.helper_functions import (
+    get_socket,
+    get_env_dict,
+    validate_cert_file,
+    arg_validator,
+    arg_validator_excepthook,
+    pretty_logger,
+    DEFAULT_CERTFILE,
+)
 
 
 # uncomment the next line to log _option_validator for debugging
@@ -53,8 +55,15 @@ class SimpleFTPServer(FTPServer):
         Path to the certificate file.
     """
 
-    def __init__(self, username="fakeusername", password="qweqwe", ftp_home=None,
-                 ftp_port=0, use_TLS=False, certfile=DEFAULT_CERTFILE):
+    def __init__(
+        self,
+        username="fakeusername",
+        password="qweqwe",
+        ftp_home=None,
+        ftp_port=0,
+        use_TLS=False,
+        certfile=DEFAULT_CERTFILE,
+    ):
         # Create temp directories for the anonymous and authenticated roots
         self._anon_root = tempfile.mkdtemp(prefix="anon_root_")
         if not ftp_home:
@@ -69,8 +78,9 @@ class SimpleFTPServer(FTPServer):
         self.username = username
         self.password = password
         authorizer = DummyAuthorizer()
-        authorizer.add_user(self.username, self.password, self._ftp_home,
-                            perm='elradfmwM')
+        authorizer.add_user(
+            self.username, self.password, self._ftp_home, perm="elradfmwM"
+        )
         authorizer.add_anonymous(self._anon_root)
 
         self._uses_TLS = use_TLS
@@ -162,6 +172,7 @@ class FunctionalityWrapper:
             Path to the certificate used by the encrypted server.
 
     """
+
     def __init__(self, use_TLS=False):
         env_dict = get_env_dict(use_TLS=use_TLS)
         self._server = SimpleFTPServer(use_TLS=use_TLS, **env_dict)
@@ -215,10 +226,12 @@ class FunctionalityWrapper:
         """
         return self._server._cert_path
 
-    def _option_validator(valid_var_overwrite=None,  # pylint: disable=no-self-argument
-                          strict_type_check=True,
-                          dev_mode=False,
-                          debug=False):
+    def _option_validator(
+        valid_var_overwrite=None,  # pylint: disable=no-self-argument
+        strict_type_check=True,
+        dev_mode=False,
+        debug=False,
+    ):
         """
         Development helperfunction to raise appropriate Error if a methods arg/kwarg
         is of wrong type or value.
@@ -248,6 +261,7 @@ class FunctionalityWrapper:
         ValueError
             If any of the checked args/kwargs has a not supported value
         """
+
         def inner_decorator(f):
             """
             Parameters
@@ -258,24 +272,20 @@ class FunctionalityWrapper:
             @wraps(f)
             def wrapper(self, *args, **kwargs):
                 valid_var_list = {
-                    "style":
-                        {"valid_values": ['rel_path', 'url'],
-                         "valid_types": [str]},
-                    "anon":
-                        {"valid_types": [bool]},
-                    "rel_file_path":
-                        {"valid_types": [str]},
-                    "read_mode":
-                        {"valid_values": ['r', 'rb'],
-                         "valid_types": [str]},
-                    "overwrite":
-                        {"valid_types": [bool]},
-                    "return_paths":
-                        {"valid_values": ['all', 'input', 'new'],
-                         "valid_types": [str]},
-                    "return_content":
-                        {"valid_types": [bool]}
-                    }
+                    "style": {
+                        "valid_values": ["rel_path", "url"],
+                        "valid_types": [str],
+                    },
+                    "anon": {"valid_types": [bool]},
+                    "rel_file_path": {"valid_types": [str]},
+                    "read_mode": {"valid_values": ["r", "rb"], "valid_types": [str]},
+                    "overwrite": {"valid_types": [bool]},
+                    "return_paths": {
+                        "valid_values": ["all", "input", "new"],
+                        "valid_types": [str],
+                    },
+                    "return_content": {"valid_types": [bool]},
+                }
                 # generate a named function args dict {"arg_name": "args_value"}
                 # the name of the first argument needs to be skipped since it is always self
                 func_locals = dict(**dict(zip(f.__code__.co_varnames[1:], args)))
@@ -286,17 +296,23 @@ class FunctionalityWrapper:
                     for key in sorted(func_locals):
                         msg_line.append(f"'{key}': {func_locals[key]}")
                     msg = "\n".join(msg_line)
-                    pretty_logger(heading, "FUNC_LOCALS\n"+msg+"\n\n")
+                    pretty_logger(heading, "FUNC_LOCALS\n" + msg + "\n\n")
                 try:
                     sys.excepthook = _excepthook
-                    arg_validator(func_locals, valid_var_list, valid_var_overwrite,
-                                  strict_type_check=strict_type_check, dev_mode=dev_mode,
-                                  implementation_func_name=f.__name__)
+                    arg_validator(
+                        func_locals,
+                        valid_var_list,
+                        valid_var_overwrite,
+                        strict_type_check=strict_type_check,
+                        dev_mode=dev_mode,
+                        implementation_func_name=f.__name__,
+                    )
                 except (ValueError, TypeError) as e:
                     sys.excepthook = arg_validator_excepthook
                     raise e
 
                 return f(self, *args, **kwargs)
+
             return wrapper
 
         return inner_decorator
@@ -314,7 +330,6 @@ class FunctionalityWrapper:
         a: any
         b: any, default 3
         """
-        pass
 
     def reset_tmp_dirs(self):
         """
@@ -355,10 +370,9 @@ class FunctionalityWrapper:
 
     @_option_validator(
         valid_var_overwrite={
-            "style":
-                {"valid_values": ["dict", "url"],
-                 'valid_types': [str]}
-        })
+            "style": {"valid_values": ["dict", "url"], "valid_types": [str]}
+        }
+    )
     def get_login_data(self, style="dict", anon=False):
         """
         Returns the login data as dict or url.
@@ -423,15 +437,23 @@ class FunctionalityWrapper:
         # even so only 'dict' and 'url' are supported values
         # here else is used for a better branch coverage
         else:
-            host = "localhost:"+str(self.server_port)
+            host = "localhost:" + str(self.server_port)
             if self.uses_TLS:
                 ftp_prefix = "ftpes"
             else:
                 ftp_prefix = "ftp"
             if anon:
-                return ftp_prefix+"://"+host
+                return ftp_prefix + "://" + host
             else:
-                return ftp_prefix+"://"+self.username+":"+self.password+"@"+host
+                return (
+                    ftp_prefix
+                    + "://"
+                    + self.username
+                    + ":"
+                    + self.password
+                    + "@"
+                    + host
+                )
 
     @_option_validator()
     def format_file_path(self, rel_file_path, style="rel_path", anon=False):
@@ -630,24 +652,22 @@ class FunctionalityWrapper:
         base_path = self.get_local_base_path(anon=anon)
         for root, _, files in os.walk(base_path):
             for file in files:
-                rel_file_path = os.path.relpath(os.path.join(root, file),
-                                                base_path)
+                rel_file_path = os.path.relpath(os.path.join(root, file), base_path)
                 yield self.format_file_path(rel_file_path, style, anon)
 
     @_option_validator(
         valid_var_overwrite={
-            "rel_file_paths":
-                {'valid_types': [type(None),
-                                 str,
-                                 Iterable]}
+            "rel_file_paths": {"valid_types": [type(None), str, Iterable]}
         },
-        strict_type_check=False)
+        strict_type_check=False,
+    )
     # if you use dev_mode=True here you will get a warning that `rel_file_paths`, isn't in
     # `valid_var_list` this is on purpose, since `rel_file_paths` gets checked with
     # `strict_type_check=False` to be able to check `collections.abc.Iterable`
     @_option_validator(dev_mode=False)
-    def get_file_contents(self, rel_file_paths=None, style="rel_path",
-                          anon=False, read_mode="r"):
+    def get_file_contents(
+        self, rel_file_paths=None, style="rel_path", anon=False, read_mode="r"
+    ):
         """
         Yields dicts containing the `path` and `content` of files on the FTP server.
 
@@ -749,17 +769,27 @@ class FunctionalityWrapper:
             # the os.path.abspath is so windows doesn't mess up with \\ in paths
             abs_path = os.path.abspath(os.path.join(base_path, rel_file_path))
             if os.path.isfile(abs_path):
-                rel_file_path = self.format_file_path(rel_file_path=rel_file_path,
-                                                      style=style, anon=anon)
+                rel_file_path = self.format_file_path(
+                    rel_file_path=rel_file_path, style=style, anon=anon
+                )
                 with open(abs_path, read_mode) as f:
                     yield {"path": rel_file_path, "content": f.read()}
             else:
-                raise ValueError(rel_file_path+" is not a valid relative file path or url.")
+                raise ValueError(
+                    rel_file_path + " is not a valid relative file path or url."
+                )
 
     @_option_validator()
-    def put_files(self, files_on_local, style="rel_path", anon=False,
-                  overwrite=False, return_paths="input", return_content=False,
-                  read_mode="r"):
+    def put_files(
+        self,
+        files_on_local,
+        style="rel_path",
+        anon=False,
+        overwrite=False,
+        return_paths="input",
+        return_content=False,
+        read_mode="r",
+    ):
         """
         Copies the files defined in `files_on_local` to the sever.
         After 'uploading' the files it returns a list of paths or
@@ -923,18 +953,22 @@ class FunctionalityWrapper:
                 dirs, filename = os.path.split(file_path_local)
                 file_path = os.path.abspath(os.path.join(base_path, filename))
                 if not os.path.isfile(file_path_local):
-                    raise ValueError(file_path_local+" is not a valid file path, "
-                                                     "to an actual file.")
+                    raise ValueError(
+                        file_path_local + " is not a valid file path, "
+                        "to an actual file."
+                    )
                 if os.path.isfile(file_path) and not overwrite:
-                    warnings.warn(UserWarning(file_path +
-                                              " does already exist and won't be overwritten. "
-                                              "Set `overwrite` to True to overwrite it anyway."
-                                              ))
+                    warnings.warn(
+                        UserWarning(
+                            file_path + " does already exist and won't be overwritten. "
+                            "Set `overwrite` to True to overwrite it anyway."
+                        )
+                    )
                 else:
                     shutil.copyfile(file_path_local, file_path)
-                    if return_paths == 'new':
+                    if return_paths == "new":
                         append_file_path(file_path)
-                if return_paths == 'input':
+                if return_paths == "input":
                     append_file_path(file_path)
 
             # implementation if a dict is used
@@ -946,56 +980,72 @@ class FunctionalityWrapper:
                     if dirs.strip() != "" and not os.path.isdir(dir_path):
                         os.makedirs(dir_path)
                     file_path_local = file_path_local["src"]
-                    file_path = os.path.abspath(os.path.join(base_path, dir_path, filename))
+                    file_path = os.path.abspath(
+                        os.path.join(base_path, dir_path, filename)
+                    )
 
                     if not os.path.isfile(file_path_local):
-                        raise ValueError(file_path_local+" is not a valid file path, "
-                                                         "to an actual file.")
+                        raise ValueError(
+                            file_path_local + " is not a valid file path, "
+                            "to an actual file."
+                        )
                     if os.path.isfile(file_path) and not overwrite:
-                        warnings.warn(UserWarning(file_path +
-                                                  " does already exist and won't be overwritten. "
-                                                  "Set `overwrite` to True to overwrite it anyway."
-                                                  ))
+                        warnings.warn(
+                            UserWarning(
+                                file_path
+                                + " does already exist and won't be overwritten. "
+                                "Set `overwrite` to True to overwrite it anyway."
+                            )
+                        )
                     else:
                         # would have liked to use symlinks on posix to reduce copy overhead,
                         # but then you get permission errors since the file isn't in the
                         # users root dir (maybe some1 has an idea how to solve that :D )
                         shutil.copyfile(file_path_local, file_path)
-                        if return_paths == 'new':
+                        if return_paths == "new":
                             append_file_path(file_path)
-                    if return_paths == 'input':
+                    if return_paths == "input":
                         append_file_path(file_path)
                 else:
-                    raise KeyError("If dicts are used in `put_files`, the dicts "
-                                   "need to have the Keys `src` and `dest`. "
-                                   "The value of `src` needs to be a valid file path.")
+                    raise KeyError(
+                        "If dicts are used in `put_files`, the dicts "
+                        "need to have the Keys `src` and `dest`. "
+                        "The value of `src` needs to be a valid file path."
+                    )
 
             else:
-                raise TypeError("`files_on_local` has to be of type a str or dict "
-                                "or iterable of str/dict.")
+                raise TypeError(
+                    "`files_on_local` has to be of type a str or dict "
+                    "or iterable of str/dict."
+                )
 
-        # this method uses return instead of a yield, because else files won't be copied
+        # this method uses return instead of a yield, because else files
+        # won't be copied
         # if the user wouldn't iterate over the values
-        if not return_paths == 'all' and not return_content:
+        if not return_paths == "all" and not return_content:
             return file_list
-        elif not return_paths == 'all':
-            return self.get_file_contents(file_list, style=style, anon=anon,
-                                          read_mode=read_mode)
+        elif not return_paths == "all":
+            return self.get_file_contents(
+                file_list, style=style, anon=anon, read_mode=read_mode
+            )
         elif not return_content:
             return self.get_file_paths(style=style, anon=anon)
         else:
-            return self.get_file_contents(style=style, anon=anon,
-                                          read_mode=read_mode)
+            return self.get_file_contents(
+                style=style,
+                anon=anon,
+                read_mode=read_mode)
 
     @_option_validator(
         valid_var_overwrite={
             "style":
-                {"valid_values": ["path", "content"],
-                 'valid_types': [str]}
-        })
+            {"valid_values": ["path", "content"], "valid_types": [str]}
+        }
+    )
     def get_cert(self, style="path", read_mode="r"):
         """
-        Returns the path to the used certificate or its content as string or bytes.
+        Returns the path to the used certificate or
+        its content as string or bytes.
 
         Parameters
         ----------
@@ -1004,7 +1054,8 @@ class FunctionalityWrapper:
 
         read_mode: {'r', 'rb'}, default 'r'
             This only applies if `style` is 'content'.
-            Mode in which files should be read (see ``open("filepath", read_mode)`` )
+            Mode in which files should be read (see
+            ``open("filepath", read_mode)`` )
 
         Returns
         -------
@@ -1024,7 +1075,8 @@ class FunctionalityWrapper:
             If the value of `read_mode` is not 'r' or 'rb'
 
         WrongFixtureError
-            If used on ``ftpserver`` fixture, instead of ``ftpserver_TLS`` fixture.
+            If used on ``ftpserver`` fixture, instead of
+            ``ftpserver_TLS`` fixture.
 
         Examples
         --------
@@ -1046,8 +1098,10 @@ class FunctionalityWrapper:
                 with open(self.cert_path, read_mode) as certfile:
                     return certfile.read()
         else:
-            raise WrongFixtureError("The fixture ftpserver isn't using TLS, and thus"
-                                    "has no certificate. Use ftpserver_TLS instead.")
+            raise WrongFixtureError(
+                "The fixture ftpserver isn't using TLS, and thus"
+                "has no certificate. Use ftpserver_TLS instead."
+            )
 
     def stop(self):
         """
@@ -1058,9 +1112,10 @@ class FunctionalityWrapper:
         Warning
         -------
 
-        If pytest-localftpserver is run in 'module' (default) or 'session' scope,
-        this should be the last test run using this fixture (in the given test module or suite),
-        Since the server can't be restarted.
+        If pytest-localftpserver is run in 'module' (default) or 'session'
+        scope, this should be the last test run using this fixture
+        (in the given test module or suite),
+        since the server can't be restarted.
 
         Examples
         --------
@@ -1082,9 +1137,11 @@ class ThreadFTPServer(FunctionalityWrapper):
     (Windows and OSX).
     To learn about the functionality check out BaseMPFTPServer.
     """
+
     def __init__(self, use_TLS=False):
         super().__init__(use_TLS=use_TLS)
-        # The server needs to run in a separate thread or it will block all tests
+        # The server needs to run in a separate thread or it will block all
+        # tests
         self.thread = threading.Thread(target=self._server.serve_forever)
         # This is a must in order to clear used sockets
         self.thread.daemon = True
@@ -1101,10 +1158,13 @@ class ProcessFTPServer(FunctionalityWrapper):
     (Linux).
     To learn about the functionality check out BaseMPFTPServer.
     """
+
     def __init__(self, use_TLS=False):
         super().__init__(use_TLS=use_TLS)
-        # The server needs to run in a separate process or it will block all tests
-        self.process = multiprocessing.Process(target=self._server.serve_forever)
+        # The server needs to run in a separate process or
+        # it will block all tests
+        self.process = multiprocessing.Process(
+            target=self._server.serve_forever)
         # This is a must in order to clear used sockets
         self.process.daemon = True
         self.process.start()
@@ -1114,7 +1174,7 @@ class ProcessFTPServer(FunctionalityWrapper):
         self.process.terminate()
 
 
-if sys.platform.startswith('linux'):
+if sys.platform.startswith("linux"):
     USE_PROCESS = True
     PytestLocalFTPServer = ProcessFTPServer
 else:
