@@ -24,10 +24,11 @@ from ssl import SSLContext, PROTOCOL_TLS
 # HELPER FUNCTIONS
 
 
-FILE_LIST = [("", "testfile1"),
-             ("testdir", "testfile2"),
-             ("testdir/nested", "testfile3"),
-             ]
+FILE_LIST = [
+    ("", "testfile1"),
+    ("testdir", "testfile2"),
+    ("testdir/nested", "testfile3"),
+]
 
 
 def ftp_login(ftp_fixture, anon=False, use_TLS=False):
@@ -70,7 +71,8 @@ def ftp_login(ftp_fixture, anon=False, use_TLS=False):
 
 
 def close_client(session):
-    # taken from https://github.com/giampaolo/pyftpdlib/blob/master/pyftpdlib/test/__init__.py
+    # taken from https://github.com/giampaolo/pyftpdlib/ \
+    #         blob/master/pyftpdlib/test/__init__.py
     """Closes a ftplib.FTP client session."""
     try:
         if session.sock is not None:
@@ -81,13 +83,19 @@ def close_client(session):
             else:
                 # ...just to make sure the server isn't replying to some
                 # pending command.
-                assert resp.startswith('221'), resp
+                assert resp.startswith("221"), resp
     finally:
         session.close()
 
 
-def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable,
-                             anon=False, use_TLS=False):
+def check_files_by_ftpclient(
+    ftp_fixture,
+    tmpdir,
+    files_on_server,
+    path_iterable,
+    anon=False,
+    use_TLS=False
+):
     """
     Convenience function to reduce code overhead.
     Downloading files with a native ftp client and checking their content.
@@ -126,7 +134,7 @@ def check_files_by_ftpclient(ftp_fixture, tmpdir, files_on_server, path_iterable
         else:
             download_file = download_dir.join(filename)
         with open(str(download_file), "wb") as f:
-            ftp.retrbinary("RETR "+file_path, f.write)
+            ftp.retrbinary("RETR " + file_path, f.write)
         with open(str(download_file)) as f:
             assert f.read() == filename
     close_client(ftp)
@@ -158,8 +166,15 @@ def check_files_by_urls(tmpdir, base_url, url_iterable):
     download_dir.remove()
 
 
-def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
-                            style, base_url, read_mode):
+def check_get_file_contents(
+    tmpdir,
+    path_list,
+    iterable_len,
+    files_on_server,
+    style,
+    base_url,
+    read_mode
+):
     """
     Convenience function to reduce code overhead.
     Compares expected file content with actual file content.
@@ -201,8 +216,8 @@ def check_get_file_contents(tmpdir, path_list, iterable_len, files_on_server,
 
 def run_ftp_stopped_test(ftpserver_fixture):
     """
-    Tests if the Server is unreachable after shutdown, by checking if a client that
-    tries to connect raises an exception.
+    Tests if the Server is unreachable after shutdown, by checking if a client
+    that tries to connect raises an exception.
 
     Parameters
     ----------
@@ -227,8 +242,7 @@ def test_ftpserver_class(ftpserver):
     assert ftpserver.uses_TLS is False
 
 
-@pytest.mark.parametrize("anon",
-                         [True, False])
+@pytest.mark.parametrize("anon", [True, False])
 def test_get_login_data(ftpserver, anon):
     login_dict = ftpserver.get_login_data(style="dict")
     assert login_dict["host"] == "localhost"
@@ -246,26 +260,33 @@ def test_get_login_data(ftpserver, anon):
 
 def test_get_login_data_exceptions(ftpserver):
     # type errors
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `style` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
         ftpserver.get_login_data(style=True)
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
         ftpserver.get_login_data(anon="not_bool")
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'dict' or 'url', the given value was "
-                                         "'rel_path'."):
+    with pytest.raises(
+        ValueError,
+        match="The Argument `style` needs to be of value "
+        "'dict' or 'url', the given value was "
+        "'rel_path'.",
+    ):
         ftpserver.get_login_data(style="rel_path")
 
 
-@pytest.mark.parametrize("is_posix",
-                         [True, False])
-@pytest.mark.parametrize("anon",
-                         [True, False])
+@pytest.mark.parametrize("is_posix", [True, False])
+@pytest.mark.parametrize("anon", [True, False])
 def test_format_file_path(ftpserver, anon, is_posix):
     if is_posix:
         path_sep_char = "/"
@@ -284,29 +305,40 @@ def test_format_file_path(ftpserver, anon, is_posix):
 
 def test_format_file_path_exceptions(ftpserver):
     # type errors
-    with pytest.raises(TypeError, match="The Argument `rel_file_path` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``int``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `rel_file_path` needs to be of type "
+        "``str``, the type given type was "
+        "``int``.",
+    ):
         ftpserver.format_file_path(1)
     # type errors
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `style` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
         ftpserver.format_file_path("test/file", style=True)
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
         ftpserver.format_file_path("test/file", anon="not_bool")
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'rel_path' or 'url', the given value was "
-                                         "'dict'."):
+    with pytest.raises(
+        ValueError,
+        match="The Argument `style` needs to be of value "
+        "'rel_path' or 'url', the given value was "
+        "'dict'.",
+    ):
         ftpserver.format_file_path("test/file", style="dict")
 
 
-@pytest.mark.parametrize("anon",
-                         [True, False])
+@pytest.mark.parametrize("anon", [True, False])
 def test_get_local_base_path(ftpserver, anon):
     # makes sure to start with clean temp dirs
     ftpserver.reset_tmp_dirs()
@@ -321,9 +353,12 @@ def test_get_local_base_path(ftpserver, anon):
 
 def test_get_local_base_path_exceptions(ftpserver):
     # type errors
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
         ftpserver.get_local_base_path(anon="not_bool")
 
 
@@ -338,7 +373,7 @@ def test_file_upload_user(ftpserver, tmpdir):
     file_path_local = tmpdir.join(filename)
     file_path_local.write("test")
     with open(str(file_path_local), "rb") as f:
-        ftp.storbinary("STOR "+filename, f)
+        ftp.storbinary("STOR " + filename, f)
     close_client(ftp)
 
     assert os.path.isdir(os.path.join(ftpserver.server_home, "FOO"))
@@ -357,8 +392,7 @@ def test_file_upload_anon(ftpserver):
     close_client(ftp)
 
 
-@pytest.mark.parametrize("anon",
-                         [True, False])
+@pytest.mark.parametrize("anon", [True, False])
 def test_get_file_paths(tmpdir, ftpserver, anon):
     # makes sure to start with clean temp dirs
     ftpserver.reset_tmp_dirs()
@@ -378,7 +412,12 @@ def test_get_file_paths(tmpdir, ftpserver, anon):
     assert len(path_iterable) == len(FILE_LIST)
     # checking the files by rel_path to user home dir
     # and native ftp client
-    check_files_by_ftpclient(ftpserver, tmpdir, files_on_server, path_iterable, anon)
+    check_files_by_ftpclient(
+            ftpserver,
+            tmpdir,
+            files_on_server,
+            path_iterable,
+            anon)
 
     # checking files by url
     url_iterable = list(ftpserver.get_file_paths(style="url", anon=anon))
@@ -389,34 +428,46 @@ def test_get_file_paths(tmpdir, ftpserver, anon):
 
 def test_get_file_paths_exceptions(ftpserver):
     # type errors
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `style` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
         list(ftpserver.get_file_paths(style=True))
 
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
         list(ftpserver.get_file_paths(anon="not_bool"))
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'rel_path' or 'url', the given value was "
-                                         "'dict'."):
+    with pytest.raises(
+        ValueError,
+        match="The Argument `style` needs to be of value "
+        "'rel_path' or 'url', the given value was "
+        "'dict'.",
+    ):
         list(ftpserver.get_file_paths(style="dict"))
 
 
-@pytest.mark.parametrize("anon",
-                         [True, False])
-@pytest.mark.parametrize("file_rel_paths",
-                         [None, "testfile1",
-                          ["testdir/testfile2", "testdir/nested/testfile3"]
-                          ])
-@pytest.mark.parametrize("style",
-                         ["rel_path", "url"])
-@pytest.mark.parametrize("read_mode",
-                         ["r", "rb"])
-def test_get_file_contents(tmpdir, ftpserver, anon, file_rel_paths, style, read_mode):
+@pytest.mark.parametrize("anon", [True, False])
+@pytest.mark.parametrize(
+    "file_rel_paths",
+    [None, "testfile1", ["testdir/testfile2", "testdir/nested/testfile3"]],
+)
+@pytest.mark.parametrize("style", ["rel_path", "url"])
+@pytest.mark.parametrize("read_mode", ["r", "rb"])
+def test_get_file_contents(
+        tmpdir,
+        ftpserver,
+        anon,
+        file_rel_paths,
+        style,
+        read_mode):
     ftpserver.reset_tmp_dirs()
     base_path = ftpserver.get_local_base_path(anon=anon)
     base_url = ftpserver.get_login_data(style="url", anon=anon)
@@ -441,85 +492,139 @@ def test_get_file_contents(tmpdir, ftpserver, anon, file_rel_paths, style, read_
     else:
         iterable_len = len(file_rel_paths)
 
-    path_list = list(ftpserver.get_file_contents(rel_file_paths=file_rel_paths,
-                                                 anon=anon, style=style, read_mode=read_mode))
+    path_list = list(
+        ftpserver.get_file_contents(
+            rel_file_paths=file_rel_paths,
+            anon=anon,
+            style=style,
+            read_mode=read_mode
+        )
+    )
 
-    check_get_file_contents(tmpdir=tmpdir, path_list=path_list, iterable_len=iterable_len,
-                            files_on_server=files_on_server, style=style, base_url=base_url,
-                            read_mode=read_mode)
+    check_get_file_contents(
+        tmpdir=tmpdir,
+        path_list=path_list,
+        iterable_len=iterable_len,
+        files_on_server=files_on_server,
+        style=style,
+        base_url=base_url,
+        read_mode=read_mode,
+    )
 
-    with pytest.raises(ValueError, match=r"not a valid relative file path or url."):
-        list(ftpserver.get_file_contents(rel_file_paths="not a file path",
-                                         anon=anon))
+    with pytest.raises(
+            ValueError,
+            match=r"not a valid relative file path or url."):
+        list(ftpserver.get_file_contents(
+            rel_file_paths="not a file path",
+            anon=anon))
 
     # tests for file_rel_paths being urls
     if isinstance(file_rel_paths, str):
-        file_rel_paths = base_url+"/"+file_rel_paths
+        file_rel_paths = base_url + "/" + file_rel_paths
     elif isinstance(file_rel_paths, list):
-        file_rel_paths = [base_url+"/"+file_rel_path for file_rel_path in file_rel_paths]
+        file_rel_paths = [
+            base_url + "/" + file_rel_path for file_rel_path in file_rel_paths
+        ]
 
-    path_list = list(ftpserver.get_file_contents(rel_file_paths=file_rel_paths,
-                                                 anon=anon, style=style, read_mode=read_mode))
+    path_list = list(
+        ftpserver.get_file_contents(
+            rel_file_paths=file_rel_paths,
+            anon=anon,
+            style=style,
+            read_mode=read_mode
+        )
+    )
 
-    check_get_file_contents(tmpdir=tmpdir, path_list=path_list, iterable_len=iterable_len,
-                            files_on_server=files_on_server, style=style, base_url=base_url,
-                            read_mode=read_mode)
+    check_get_file_contents(
+        tmpdir=tmpdir,
+        path_list=path_list,
+        iterable_len=iterable_len,
+        files_on_server=files_on_server,
+        style=style,
+        base_url=base_url,
+        read_mode=read_mode,
+    )
 
-    with pytest.raises(ValueError, match=r"not a valid relative file path or url."):
-        list(ftpserver.get_file_contents(rel_file_paths="ftp://some-other-server",
-                                         anon=anon))
+    with pytest.raises(
+            ValueError,
+            match=r"not a valid relative file path or url."):
+        list(
+            ftpserver.get_file_contents(
+                rel_file_paths="ftp://some-other-server", anon=anon
+            )
+        )
 
 
 def test_get_file_contents_exceptions(ftpserver):
     # type errors
-    with pytest.raises(TypeError, match="The Argument `rel_file_paths` needs to be of type "
-                                        "``NoneType``, ``str`` or ``Iterable``, the type given "
-                                        "type was ``int``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `rel_file_paths` needs to be of type "
+        "``NoneType``, ``str`` or ``Iterable``, the type given "
+        "type was ``int``.",
+    ):
         list(ftpserver.get_file_contents(rel_file_paths=1))
 
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `style` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
         list(ftpserver.get_file_contents(style=True))
 
-    with pytest.raises(TypeError, match="The Argument `read_mode` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `read_mode` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
         list(ftpserver.get_file_contents(read_mode=True))
 
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
         list(ftpserver.get_file_contents(anon="not_bool"))
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'rel_path' or 'url', the given value was "
-                                         "'dict'."):
+    with pytest.raises(
+        ValueError,
+        match="The Argument `style` needs to be of value "
+        "'rel_path' or 'url', the given value was "
+        "'dict'.",
+    ):
         list(ftpserver.get_file_contents(style="dict"))
 
-    with pytest.raises(ValueError, match="The Argument `read_mode` needs to be of value "
-                                         "'r' or 'rb', the given value was "
-                                         "'invalid_option'."):
+    with pytest.raises(
+        ValueError,
+        match="The Argument `read_mode` needs to be of value "
+        "'r' or 'rb', the given value was "
+        "'invalid_option'.",
+    ):
         list(ftpserver.get_file_contents(read_mode="invalid_option"))
 
 
-@pytest.mark.parametrize("use_dict",
-                         [True, False])
-@pytest.mark.parametrize("style",
-                         ["rel_path", "url"])
-@pytest.mark.parametrize("anon",
-                         [True, False])
-@pytest.mark.parametrize("overwrite",
-                         [True, False])
-@pytest.mark.parametrize("return_paths",
-                         ['all', 'input', 'new'])
-@pytest.mark.parametrize("return_content",
-                         [True, False])
-@pytest.mark.parametrize("read_mode",
-                         ["r", "rb"])
-def test_put_files(tmpdir, ftpserver, use_dict, style, anon, overwrite,
-                   return_paths, return_content, read_mode):
+@pytest.mark.parametrize("use_dict", [True, False])
+@pytest.mark.parametrize("style", ["rel_path", "url"])
+@pytest.mark.parametrize("anon", [True, False])
+@pytest.mark.parametrize("overwrite", [True, False])
+@pytest.mark.parametrize("return_paths", ["all", "input", "new"])
+@pytest.mark.parametrize("return_content", [True, False])
+@pytest.mark.parametrize("read_mode", ["r", "rb"])
+def test_put_files(
+    tmpdir,
+    ftpserver,
+    use_dict,
+    style,
+    anon,
+    overwrite,
+    return_paths,
+    return_content,
+    read_mode,
+):
     """
     This test breaks if test_get_files breaks
     """
@@ -544,32 +649,54 @@ def test_put_files(tmpdir, ftpserver, use_dict, style, anon, overwrite,
             files_on_local.append(file_dict)
         files_on_server.append(file_path)
 
-    put_files_return = list(ftpserver.put_files(files_on_local=files_on_local, style=style,
-                                                anon=anon, overwrite=overwrite,
-                                                return_paths=return_paths,
-                                                return_content=return_content,
-                                                read_mode=read_mode))
+    put_files_return = list(
+        ftpserver.put_files(
+            files_on_local=files_on_local,
+            style=style,
+            anon=anon,
+            overwrite=overwrite,
+            return_paths=return_paths,
+            return_content=return_content,
+            read_mode=read_mode,
+        )
+    )
     assert len(put_files_return) == len(FILE_LIST)
 
     if style == "rel_path":
         if not return_content:
-            check_files_by_ftpclient(ftp_fixture=ftpserver, tmpdir=tmpdir,
-                                     files_on_server=files_on_server,
-                                     path_iterable=put_files_return, anon=anon)
+            check_files_by_ftpclient(
+                ftp_fixture=ftpserver,
+                tmpdir=tmpdir,
+                files_on_server=files_on_server,
+                path_iterable=put_files_return,
+                anon=anon,
+            )
         else:
-            check_get_file_contents(tmpdir=tmpdir, path_list=put_files_return,
-                                    iterable_len=len(FILE_LIST),
-                                    files_on_server=files_on_server, style=style,
-                                    base_url=base_url, read_mode=read_mode)
+            check_get_file_contents(
+                tmpdir=tmpdir,
+                path_list=put_files_return,
+                iterable_len=len(FILE_LIST),
+                files_on_server=files_on_server,
+                style=style,
+                base_url=base_url,
+                read_mode=read_mode,
+            )
 
     elif style == "url":
         if not return_content:
-            check_files_by_urls(tmpdir=tmpdir, base_url=base_url, url_iterable=put_files_return)
+            check_files_by_urls(
+                tmpdir=tmpdir, base_url=base_url, url_iterable=put_files_return
+            )
         else:
-            check_get_file_contents(tmpdir=tmpdir, path_list=put_files_return,
-                                    iterable_len=len(FILE_LIST),
-                                    files_on_server=files_on_server, style=style,
-                                    base_url=base_url, read_mode=read_mode)
+            check_get_file_contents(
+                tmpdir=tmpdir,
+                path_list=put_files_return,
+                iterable_len=len(FILE_LIST),
+                files_on_server=files_on_server,
+                style=style,
+                base_url=base_url,
+                read_mode=read_mode,
+            )
 
     # testing overwrite funtionality
     overwrite_file = files_on_local[0]
@@ -578,32 +705,46 @@ def test_put_files(tmpdir, ftpserver, use_dict, style, anon, overwrite,
         overwrite_result = os.path.split(overwrite_file)[1]
     else:
         overwrite_result = overwrite_file["dest"]
-    overwrite_result = ftpserver.format_file_path(overwrite_result,
-                                                  style=style, anon=anon)
+    overwrite_result = ftpserver.format_file_path(
+        overwrite_result, style=style, anon=anon
+    )
 
     if overwrite:
-        overwrite_put_files_return = ftpserver.put_files(overwrite_file, style=style,
-                                                         anon=anon, overwrite=overwrite,
-                                                         return_paths=return_paths)
+        overwrite_put_files_return = ftpserver.put_files(
+            overwrite_file,
+            style=style,
+            anon=anon,
+            overwrite=overwrite,
+            return_paths=return_paths,
+        )
         if return_paths == "new":
             assert overwrite_put_files_return == [overwrite_result]
         if return_paths == "input":
             assert overwrite_put_files_return == [overwrite_result]
         elif return_paths == "all":
-            overwrite_result = list(ftpserver.get_file_paths(style=style, anon=anon))
+            overwrite_result = list(
+                ftpserver.get_file_paths(style=style, anon=anon))
             assert list(overwrite_put_files_return) == overwrite_result
 
     else:
-        with pytest.warns(UserWarning, match=r"already exist and won't be overwritten"):
-            overwrite_put_files_return = ftpserver.put_files(overwrite_file, style=style,
-                                                             anon=anon, overwrite=overwrite,
-                                                             return_paths=return_paths)
+        with pytest.warns(
+                UserWarning,
+                match=r"already exist and won't be overwritten"):
+            overwrite_put_files_return = ftpserver.put_files(
+                overwrite_file,
+                style=style,
+                anon=anon,
+                overwrite=overwrite,
+                return_paths=return_paths,
+            )
             if return_paths == "new":
                 assert overwrite_put_files_return == []
             elif return_paths == "input":
                 assert overwrite_put_files_return == [overwrite_result]
             elif return_paths == "all":
-                overwrite_result = list(ftpserver.get_file_paths(style=style, anon=anon))
+                overwrite_result = list(
+                    ftpserver.get_file_paths(style=style, anon=anon)
+                )
                 assert list(overwrite_put_files_return) == overwrite_result
 
     # delete local files
@@ -637,62 +778,97 @@ def test_put_files_exceptions(ftpserver, tmpdir):
     # type errors in options
 
     with pytest.raises(TypeError, match=r"has to be of type"):
-        ftpserver.put_files(1, )
+        ftpserver.put_files(
+            1,
+        )
 
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            style=True)
+    with pytest.raises(
+        TypeError,
+        match="The Argument `style` needs to be of type "
+        "``str``, the type given type was "
+        "``bool``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4", style=True)
 
-    with pytest.raises(TypeError, match="The Argument `anon` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            anon="not_bool")
+    with pytest.raises(
+        TypeError,
+        match="The Argument `anon` needs to be of type "
+        "``bool``, the type given type was "
+        "``str``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4", anon="not_bool")
 
-    with pytest.raises(TypeError, match="The Argument `overwrite` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            overwrite="not_bool")
+    with pytest.raises(
+        TypeError,
+        match="The Argument `overwrite` needs to be of type "
+        "``bool``, the type given type was ``str``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4", overwrite="not_bool"
+        )
 
-    with pytest.raises(TypeError, match="The Argument `return_paths` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            return_paths=True)
+    with pytest.raises(
+        TypeError,
+        match="The Argument `return_paths` needs to be of type "
+        "``str``, the type given type was ``bool``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4", return_paths=True
+        )
 
-    with pytest.raises(TypeError, match="The Argument `return_content` needs to be of type "
-                                        "``bool``, the type given type was "
-                                        "``str``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            return_content="not_bool")
+    with pytest.raises(
+        TypeError,
+        match="The Argument `return_content` needs to be of type "
+        "``bool``, the type given type was ``str``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4",
+            return_content="not_bool"
+        )
 
-    with pytest.raises(TypeError, match="The Argument `read_mode` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            read_mode=True)
+    with pytest.raises(
+        TypeError,
+        match="The Argument `read_mode` needs to be of type "
+        "``str``, the type given type was ``bool``.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4",
+            read_mode=True)
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'rel_path' or 'url', the given value was "
-                                         "'dict'."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            style="dict")
+    with pytest.raises(
+        ValueError,
+        match="The Argument `style` needs to be of value "
+        "'rel_path' or 'url', the given value was "
+        "'dict'.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4",
+            style="dict")
 
-    with pytest.raises(ValueError, match="The Argument `return_paths` needs to be of value "
-                                         "'all', 'input' or 'new', the given value was "
-                                         "'invalid_option'."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            return_paths="invalid_option")
+    with pytest.raises(
+        ValueError,
+        match="The Argument `return_paths` needs to be of value "
+        "'all', 'input' or 'new', the given value was "
+        "'invalid_option'.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4",
+            return_paths="invalid_option"
+        )
 
-    with pytest.raises(ValueError, match="The Argument `read_mode` needs to be of value "
-                                         "'r' or 'rb', the given value was "
-                                         "'invalid_option'."):
-        ftpserver.put_files("doesn't matter since option check is be4",
-                            read_mode="invalid_option")
+    with pytest.raises(
+        ValueError,
+        match="The Argument `read_mode` needs to be of value "
+        "'r' or 'rb', the given value was "
+        "'invalid_option'.",
+    ):
+        ftpserver.put_files(
+            "doesn't matter since option check is be4",
+            read_mode="invalid_option"
+        )
 
 
 def test_option_validator_logging(caplog, ftpserver):
@@ -701,14 +877,16 @@ def test_option_validator_logging(caplog, ftpserver):
         caplog.clear()
 
         ftpserver.__test_option_validator_logging__(1, 3)
-        log_output = "\n" \
-                     "##################################################\n" \
-                     "#       __TEST_OPTION_VALIDATOR_LOGGING__        #\n" \
-                     "##################################################\n" \
-                     "\n\n" \
-                     "FUNC_LOCALS\n" \
-                     "'a': 1\n" \
-                     "'b': 3\n\n\n\n"
+        log_output = (
+            "\n"
+            "##################################################\n"
+            "#       __TEST_OPTION_VALIDATOR_LOGGING__        #\n"
+            "##################################################\n"
+            "\n\n"
+            "FUNC_LOCALS\n"
+            "'a': 1\n"
+            "'b': 3\n\n\n\n"
+        )
 
         assert [log_output] == [rec.message for rec in caplog.records]
 
@@ -723,7 +901,8 @@ def test_ftp_stopped(ftpserver):
 
 
 def test_fail_due_to_closed_module_scope(ftpserver):
-    """This test is just meant to confirm that the server is down on module scope"""
+    """This test is just meant to confirm that the server
+    is down on module scope"""
     ftp = FTP()
     with pytest.raises(Exception):
         ftp.connect("localhost", port=ftpserver.server_port)

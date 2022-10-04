@@ -18,8 +18,9 @@ def test_get_env_dict(use_TLS):
     result_dict = {}
     result_dict["username"] = "benz"
     result_dict["password"] = "erni1"
-    result_dict["certfile"] = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                           "test_keycert.pem"))
+    result_dict["certfile"] = os.path.abspath(
+            os.path.join(os.path.dirname(__file__),
+                         "test_keycert.pem"))
     if use_TLS:
         result_dict["ftp_home"] = os.getenv("FTP_HOME_TLS", "")
         result_dict["ftp_port"] = 31176

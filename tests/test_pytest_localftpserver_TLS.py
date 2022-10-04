@@ -61,7 +61,8 @@ def test_file_upload_user(ftpserver_TLS, tmpdir):
     close_client(ftp)
 
     assert os.path.isdir(os.path.join(ftpserver_TLS.server_home, "FOO"))
-    abs_file_path_server = os.path.join(ftpserver_TLS.server_home, "FOO", filename)
+    abs_file_path_server = os.path.join(ftpserver_TLS.server_home, "FOO",
+                                        filename)
     assert os.path.isfile(abs_file_path_server)
     with open(abs_file_path_server) as f:
         assert f.read() == "test"
@@ -97,8 +98,12 @@ def test_get_file_paths(tmpdir, ftpserver_TLS, anon):
     assert len(path_iterable) == len(FILE_LIST)
     # checking the files by rel_path to user home dir
     # and native ftp client
-    check_files_by_ftpclient(ftpserver_TLS, tmpdir, files_on_server, path_iterable,
-                             anon, use_TLS=True)
+    check_files_by_ftpclient(ftpserver_TLS,
+                             tmpdir,
+                             files_on_server,
+                             path_iterable,
+                             anon,
+                             use_TLS=True)
 
 
 @pytest.mark.parametrize("style, read_mode", [
@@ -116,31 +121,36 @@ def test_ftpserver_TLS_get_cert(ftpserver_TLS, style, read_mode):
 
 
 def test_ftpserver_get_cert_exceptions(ftpserver, ftpserver_TLS):
-    with pytest.raises(WrongFixtureError,
-                       match=r"The fixture ftpserver isn't using TLS, and thus"
-                             r"has no certificate. Use ftpserver_TLS instead."):
+    with pytest.raises(
+            WrongFixtureError,
+            match=r"The fixture ftpserver isn't using TLS, and thus"
+                  r"has no certificate. Use ftpserver_TLS instead."):
         ftpserver.get_cert()
 
     # type errors
-    with pytest.raises(TypeError, match="The Argument `style` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+            TypeError,
+            match="The Argument `style` needs to be of type "
+                  "``str``, the type given type was ``bool``."):
         ftpserver.get_cert(style=True)
 
-    with pytest.raises(TypeError, match="The Argument `read_mode` needs to be of type "
-                                        "``str``, the type given type was "
-                                        "``bool``."):
+    with pytest.raises(
+            TypeError,
+            match="The Argument `read_mode` needs to be of type "
+                  "``str``, the type given type was ``bool``."):
         ftpserver.get_cert(read_mode=True)
 
     # value errors
-    with pytest.raises(ValueError, match="The Argument `style` needs to be of value "
-                                         "'path' or 'content', the given value was "
-                                         "'dict'."):
+    with pytest.raises(
+            ValueError,
+            match="The Argument `style` needs to be of value "
+                  "'path' or 'content', the given value was 'dict'."):
         list(ftpserver.get_cert(style="dict"))
 
-    with pytest.raises(ValueError, match="The Argument `read_mode` needs to be of value "
-                                         "'r' or 'rb', the given value was "
-                                         "'invalid_option'."):
+    with pytest.raises(
+            ValueError,
+            match="The Argument `read_mode` needs to be of value "
+                  "'r' or 'rb', the given value was 'invalid_option'."):
         list(ftpserver.get_cert(read_mode="invalid_option"))
 
 

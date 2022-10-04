@@ -35,10 +35,12 @@ def test_get_scope(monkeypatch, env_var):
 
 def test_get_scope_warn(monkeypatch):
     monkeypatch.setenv('FTP_FIXTURE_SCOPE', "not_a_scope")
-    with pytest.warns(UserWarning, match=r"The scope 'not_a_scope', given by the environment "
-                                         r"variable 'FTP_FIXTURE_SCOPE' is not a valid scope, "
-                                         r"which is why the default scope 'module'was used. "
-                                         r"Valid scopes are 'function', 'module' and 'session'."):
+    with pytest.warns(
+        UserWarning,
+        match=r"The scope 'not_a_scope', given by the environment "
+              r"variable 'FTP_FIXTURE_SCOPE' is not a valid scope, "
+              r"which is why the default scope 'module'was used. "
+              r"Valid scopes are 'function', 'module' and 'session'."):
         get_scope()
 
 
@@ -46,9 +48,10 @@ def test_get_socket():
     socket_obj, taken_port = get_socket()
     assert isinstance(socket_obj, socket.socket)
     assert isinstance(taken_port, int)
-    with pytest.warns(UserWarning, match=r"PYTEST_LOCALFTPSERVER: "
-                                         r"The desire port {} was not free, so the "
-                                         r"server will run at port \d+.".format(taken_port)):
+    with pytest.warns(
+        UserWarning, match=r"PYTEST_LOCALFTPSERVER: "
+                           r"The desire port {} was not free, so the "
+                           r"server will run at port \d+.".format(taken_port)):
         socket_obj2, new_port = get_socket(taken_port)
         assert isinstance(socket_obj2, socket.socket)
         assert taken_port != new_port
@@ -102,7 +105,8 @@ def test_arg_validator():
     error_types = {"test_str": [1, "``str``", "int"],
                    "test_bool": ["True", "``bool``", "str"],
                    "test_int": [False, "``int``", "bool"],
-                   "test_multi_type": [False, "``str``, ``list`` or ``tuple``", "bool"]}
+                   "test_multi_type":
+                   [False, "``str``, ``list`` or ``tuple``", "bool"]}
     for key, (val, type_str, given_type) in error_types.items():
         func_locals_wrong_type = dict(func_locals)
         func_locals_wrong_type[key] = val
@@ -131,7 +135,8 @@ def test_arg_validator():
                       strict_type_check=False)
 
     # test value validation
-    error_values = {"test_str": ["wrong value", "'str' or 'another_str'", "'wrong value'"],
+    error_values = {"test_str":
+                    ["wrong value", "'str' or 'another_str'", "'wrong value'"],
                     "test_int": [1, "`7`", "`1`"]}
     for key, (val, value_string, given_value) in error_values.items():
         func_locals_wrong_value = dict(func_locals)
