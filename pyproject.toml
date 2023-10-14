@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=67.0.0", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pytest_localftpserver"
+dynamic = ["version"]
+description="A PyTest plugin which provides an FTP fixture for your tests"
+authors = [
+  {name = "Oz N Tiram", email = "oz.tiram@gmail.com"},
+]
+readme = "README.rst"
+classifiers = [
+  'Development Status :: 5 - Production/Stable',
+  'Intended Audience :: Developers',
+  'Operating System :: MacOS :: MacOS X',
+  'Operating System :: Microsoft :: Windows',
+  'Operating System :: POSIX :: Linux',
+  'Operating System :: POSIX',
+  'License :: OSI Approved :: MIT License',
+  'Natural Language :: English',
+  'Programming Language :: Python :: 3',
+  'Programming Language :: Python :: 3.7',
+  'Programming Language :: Python :: 3.8',
+  'Programming Language :: Python :: 3.9',
+  'Programming Language :: Python :: 3.10',
+  'Programming Language :: Python :: 3 :: Only',
+  'Framework :: Pytest',
+  'Topic :: Software Development :: Testing',
+  'Topic :: Software Development :: Testing :: Mocking'
+]
+
+dependencies = [
+  'pyftpdlib>=1.2.0',
+  'PyOpenSSL',
+  'pytest'
+]
+
+[tool.setuptools]
+packages = ["pytest_localftpserver"]
+
+[project.entry-points.pytest11]
+localftpserver = "pytest_localftpserver.plugin"
+
+[project.urls]
+homepage = 'https://github.com/oz123/pytest-localftpserver'
+
+[tool.setuptools_scm]
+write_to = "pytest_localftpserver/_version.py"
