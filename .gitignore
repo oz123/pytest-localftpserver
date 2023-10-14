@@ -72,3 +72,4 @@ target/
 
 # vs-code config files
 .vscode
+pytest_localftpserver/_version.py
