@@ -19,7 +19,7 @@ from pytest_localftpserver.servers import USE_PROCESS
 from pytest_localftpserver.helper_functions import DEFAULT_CERTFILE
 
 
-from ssl import SSLContext, PROTOCOL_TLS
+from ssl import SSLContext, PROTOCOL_TLS_CLIENT, TLSVersion
 
 # HELPER FUNCTIONS
 
@@ -54,7 +54,9 @@ def ftp_login(ftp_fixture, anon=False, use_TLS=False):
 
     """
     if use_TLS:
-        ssl_context = SSLContext(PROTOCOL_TLS)
+        ssl_context = SSLContext(PROTOCOL_TLS_CLIENT)
+        ssl_context.minimum_version = TLSVersion.TLSv1_2
+        ssl_context.maximum_version = TLSVersion.TLSv1_3
         ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
         ftp = FTP_TLS(context=ssl_context)
     else:
