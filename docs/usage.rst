@@ -68,14 +68,16 @@ checks if it was written properly.
 
     from ssl import SSLContext
     try:
-        from ssl import PROTOCOL_TLS
+        from ssl import PROTOCOL_TLS_CLIENT, TLSVersion
     except Exception:
         from ssl import PROTOCOL_SSLv23 as PROTOCOL_TLS
 
 
     def test_TLS_login(ftpserver_TLS):
         if PYTHON3:
-            ssl_context = SSLContext(PROTOCOL_TLS)
+            ssl_context = SSLContext(PROTOCOL_TLS_CLIENT)
+            ssl_context.minimum_version = TLSVersion.TLSv1_2
+            ssl_context.maximum_version = TLSVersion.TLSv1_3
             ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
             ftp = FTP_TLS(context=ssl_context)
         else:

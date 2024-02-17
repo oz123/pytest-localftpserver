@@ -7,7 +7,7 @@ from traceback import print_tb
 import warnings
 
 from ssl import SSLContext, SSLError
-from ssl import PROTOCOL_TLS
+from ssl import PROTOCOL_TLS_CLIENT, TLSVersion
 
 DEFAULT_CERTFILE = os.path.join(os.path.dirname(__file__),
                                 "default_keycert.pem")
@@ -81,7 +81,9 @@ def validate_cert_file(cert_file):
     """
     cert_file = os.path.abspath(cert_file)
     try:
-        context = SSLContext(PROTOCOL_TLS)
+        context = SSLContext(PROTOCOL_TLS_CLIENT)
+        context.minimum_version = TLSVersion.TLSv1_2
+        context.maximum_version = TLSVersion.TLSv1_3
         context.load_cert_chain(cert_file)
     except SSLError as e:
         raise InvalidCertificateError("The certificate {}, you tried to use is not valid. "
