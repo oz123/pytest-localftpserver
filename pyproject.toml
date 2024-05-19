@@ -34,7 +34,6 @@ dependencies = [
   'pyftpdlib>=1.2.0',
   'PyOpenSSL',
   'pytest',
-  'wget'
 ]
 
 [tool.setuptools]
