@@ -10,9 +10,9 @@ Tests for `pytest_localftpserver` module.
 from ftplib import FTP, FTP_TLS, error_perm
 import logging
 import os
+import urllib.request
 
 import pytest
-import wget
 
 from pytest_localftpserver.plugin import PytestLocalFTPServer
 from pytest_localftpserver.servers import USE_PROCESS
@@ -158,14 +158,10 @@ def check_files_by_urls(tmpdir, base_url, url_iterable):
         Contains urls to check
     """
     # checking files by url
-    download_dir = tmpdir.mkdir("download_url")
     for url in url_iterable:
         _, filename = os.path.split(os.path.relpath(url, base_url))
-        download_file = download_dir.join(filename)
-        wget.download(url, str(download_file))
-        with open(str(download_file)) as f:
-            assert f.read() == filename
-    download_dir.remove()
+        with urllib.request.urlopen(url) as response:
+            assert response.read() == filename.encode()
 
 
 def check_get_file_contents(
