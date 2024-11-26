@@ -1159,11 +1159,19 @@ class ProcessFTPServer(FunctionalityWrapper):
     To learn about the functionality check out BaseMPFTPServer.
     """
 
+    # Python 3.14 changed the non-macOS POSIX default to forkserver
+    # but the code in this module does not work with it
+    # See https://github.com/python/cpython/issues/125714
+    if multiprocessing.get_start_method() == 'forkserver':
+        _mp_context = multiprocessing.get_context(method='fork')
+    else:
+        _mp_context = multiprocessing.get_context()
+
     def __init__(self, use_TLS=False):
         super().__init__(use_TLS=use_TLS)
         # The server needs to run in a separate process or
         # it will block all tests
-        self.process = multiprocessing.Process(
+        self.process = self._mp_context.Process(
             target=self._server.serve_forever)
         # This is a must in order to clear used sockets
         self.process.daemon = True
