@@ -3,7 +3,7 @@ wheel>=0.30.0
 
 # install requirements
 pyftpdlib==1.5.8
-pyOpenSSL==24.1.0
+pyOpenSSL==25.0.0
 pytest==8.2.0
 
 
