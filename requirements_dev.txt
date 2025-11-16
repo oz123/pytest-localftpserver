@@ -2,9 +2,9 @@ bump2version>=0.5.10
 wheel>=0.30.0
 
 # install requirements
-pyftpdlib==1.5.8
-pyOpenSSL==24.1.0
-pytest==8.2.0
+pyftpdlib>=1.5.8
+pyOpenSSL>=24.1.0
+pytest>=8.2.0
 
 
 # documentation
@@ -14,5 +14,5 @@ sphinx-rtd-theme>=0.5.0
 
 # testing
 flake8>=2.6.0
-tox==4.15.1
+tox==4.21.2
 coverage>=4.3.0
