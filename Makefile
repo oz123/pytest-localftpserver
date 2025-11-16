@@ -23,6 +23,9 @@ endef
 export PRINT_HELP_PYSCRIPT
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
+
+DEFAULT_PY ?= 3.12
+
 help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
@@ -51,7 +54,7 @@ lint: ## check style with flake8
 	flake8 pytest_localftpserver tests
 
 test: ## run tests quickly with the default Python
-	tox -e py39
+	tox -e $(DEFAULT_PY)
 
 test-all: ## run tests on every Python version with tox
 	tox
