@@ -13,6 +13,7 @@ import os
 import urllib.request
 
 import pytest
+import ssl
 
 from pytest_localftpserver.plugin import PytestLocalFTPServer
 from pytest_localftpserver.servers import USE_PROCESS
@@ -58,6 +59,10 @@ def ftp_login(ftp_fixture, anon=False, use_TLS=False):
         ssl_context.minimum_version = TLSVersion.TLSv1_2
         ssl_context.maximum_version = TLSVersion.TLSv1_3
         ssl_context.load_cert_chain(certfile=DEFAULT_CERTFILE)
+        ftp = FTP_TLS(context=ssl_context)
+        # Disable certificate verification for self-signed certificates in tests
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
         ftp = FTP_TLS(context=ssl_context)
     else:
         ftp = FTP()
