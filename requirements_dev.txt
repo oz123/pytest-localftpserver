@@ -5,7 +5,7 @@ wheel>=0.30.0
 
 pyftpdlib>=2.0.0
 pyOpenSSL>=24.1.0
-pytest>=8.2.0
+pytest>=8.2.2
 
 
 
