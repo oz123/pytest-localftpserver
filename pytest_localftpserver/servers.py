@@ -6,7 +6,6 @@ import shutil
 import sys
 from sys import excepthook as _excepthook
 import tempfile
-import threading
 import warnings
 
 from pyftpdlib.authorizers import DummyAuthorizer
@@ -77,35 +76,41 @@ class SimpleFTPServer(FTPServer):
             self._ftp_home = ftp_home
         self.username = username
         self.password = password
+        self._uses_TLS = use_TLS
+        self._cert_path = certfile
+        self._socket, self._ftp_port = get_socket(ftp_port)
+        self.shutdown_event = multiprocessing.Event()
+
+    def run(self):
         authorizer = DummyAuthorizer()
         authorizer.add_user(
             self.username, self.password, self._ftp_home, perm="elradfmwM"
         )
         authorizer.add_anonymous(self._anon_root)
 
-        self._uses_TLS = use_TLS
-        self._cert_path = certfile
-
-        if use_TLS:
+        if self._uses_TLS:
             handler = TLS_FTPHandler
-            handler.certfile = certfile
-            validate_cert_file(certfile)
+            handler.certfile = self._cert_path
+            validate_cert_file(self._cert_path)
         else:
             handler = FTPHandler
-
-        socket, self._ftp_port = get_socket(ftp_port)
-
         handler.authorizer = authorizer
 
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, socket, handler)
+        FTPServer.__init__(self, self._socket, handler)
+
+        while not self.shutdown_event.is_set():
+            self.serve_forever(timeout=1, blocking=False, handle_exit=False)
+
+        self.close_all()
 
     def stop(self):
         """
         Stops the server, closes all the open ports and deletes all temp files
         """
-        self.close_all()
+        self.shutdown_event.set()
+        self._socket.close()
         self.clear_tmp_dirs()
 
     def clear_tmp_dirs(self):
@@ -1131,60 +1136,20 @@ class FunctionalityWrapper:
         self.stop()
 
 
-class ThreadFTPServer(FunctionalityWrapper):
+class PytestLocalFTPServer(FunctionalityWrapper):
     """
-    Implementation of the server based on FunctionalityWrapper for
-    (Windows and OSX).
-    To learn about the functionality check out BaseMPFTPServer.
+    Implementation of the server based on FunctionalityWrapper.
     """
-
-    def __init__(self, use_TLS=False):
-        super().__init__(use_TLS=use_TLS)
-        # The server needs to run in a separate thread or it will block all
-        # tests
-        self.thread = threading.Thread(target=self._server.serve_forever)
-        # This is a must in order to clear used sockets
-        self.thread.daemon = True
-        self.thread.start()
-
-    def stop(self):
-        super().stop()
-        self.thread.join()
-
-
-class ProcessFTPServer(FunctionalityWrapper):
-    """
-    Implementation of the server based on FunctionalityWrapper for
-    (Linux).
-    To learn about the functionality check out BaseMPFTPServer.
-    """
-
-    # Python 3.14 changed the non-macOS POSIX default to forkserver
-    # but the code in this module does not work with it
-    # See https://github.com/python/cpython/issues/125714
-    if multiprocessing.get_start_method() == 'forkserver':
-        _mp_context = multiprocessing.get_context(method='fork')
-    else:
-        _mp_context = multiprocessing.get_context()
 
     def __init__(self, use_TLS=False):
         super().__init__(use_TLS=use_TLS)
         # The server needs to run in a separate process or
         # it will block all tests
-        self.process = self._mp_context.Process(
-            target=self._server.serve_forever)
-        # This is a must in order to clear used sockets
-        self.process.daemon = True
+        self.process = multiprocessing.Process(
+            target=self._server.run)
         self.process.start()
 
     def stop(self):
         super().stop()
         self.process.terminate()
-
-
-if sys.platform.startswith("linux"):
-    USE_PROCESS = True
-    PytestLocalFTPServer = ProcessFTPServer
-else:
-    USE_PROCESS = False
-    PytestLocalFTPServer = ThreadFTPServer
+        self.process.join()
