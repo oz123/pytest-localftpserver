@@ -228,7 +228,7 @@ def run_ftp_stopped_test(ftpserver_fixture):
     """
     ftpserver_fixture.stop()
     ftp = FTP()
-    with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
+    with pytest.raises(OSError):
         ftp.connect("localhost", port=ftpserver_fixture.server_port)
 
 

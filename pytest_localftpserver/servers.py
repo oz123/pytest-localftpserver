@@ -1,6 +1,6 @@
+import threading
 from collections.abc import Iterable
 from functools import wraps
-import multiprocessing
 import os
 import shutil
 import sys
@@ -10,6 +10,7 @@ import warnings
 
 from pyftpdlib.authorizers import DummyAuthorizer
 from pyftpdlib.handlers import FTPHandler, TLS_FTPHandler
+from pyftpdlib.ioloop import IOLoop
 from pyftpdlib.servers import FTPServer
 
 from pytest_localftpserver.helper_functions import (
@@ -79,7 +80,7 @@ class SimpleFTPServer(FTPServer):
         self._uses_TLS = use_TLS
         self._cert_path = certfile
         self._socket, self._ftp_port = get_socket(ftp_port)
-        self.shutdown_event = multiprocessing.Event()
+        self.shutdown_event = threading.Event()
 
     def run(self):
         authorizer = DummyAuthorizer()
@@ -96,9 +97,13 @@ class SimpleFTPServer(FTPServer):
             handler = FTPHandler
         handler.authorizer = authorizer
 
+        # Create an independent IOLoop instance for the current thread to use.
+        # This prevents multiple server threads from competing for the global socket map.
+        self.ioloop = IOLoop()
+
         # Create a new pyftpdlib server with the socket and handler we've
         # configured
-        FTPServer.__init__(self, self._socket, handler)
+        FTPServer.__init__(self, self._socket, handler, ioloop=self.ioloop)
 
         while not self.shutdown_event.is_set():
             self.serve_forever(timeout=1, blocking=False, handle_exit=False)
@@ -110,7 +115,6 @@ class SimpleFTPServer(FTPServer):
         Stops the server, closes all the open ports and deletes all temp files
         """
         self.shutdown_event.set()
-        self._socket.close()
         self.clear_tmp_dirs()
 
     def clear_tmp_dirs(self):
@@ -1143,13 +1147,12 @@ class PytestLocalFTPServer(FunctionalityWrapper):
 
     def __init__(self, use_TLS=False):
         super().__init__(use_TLS=use_TLS)
-        # The server needs to run in a separate process or
-        # it will block all tests
-        self.process = multiprocessing.Process(
+        # The server needs to run in a separate thread,
+        # or it will block all tests
+        self.thread = threading.Thread(
             target=self._server.run)
-        self.process.start()
+        self.thread.start()
 
     def stop(self):
         super().stop()
-        self.process.terminate()
-        self.process.join()
+        self.thread.join()
