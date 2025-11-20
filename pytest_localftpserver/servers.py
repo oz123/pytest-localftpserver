@@ -33,7 +33,7 @@ class WrongFixtureError(Exception):
     pass
 
 
-class SimpleFTPServer(FTPServer):
+class SimpleFTPServer:
     """
     Starts a simple FTP server.
 
@@ -97,18 +97,15 @@ class SimpleFTPServer(FTPServer):
             handler = FTPHandler
         handler.authorizer = authorizer
 
-        # Create an independent IOLoop instance for the current thread to use.
-        # This prevents multiple server threads from competing for the global socket map.
-        self.ioloop = IOLoop()
-
-        # Create a new pyftpdlib server with the socket and handler we've
-        # configured
-        FTPServer.__init__(self, self._socket, handler, ioloop=self.ioloop)
+        # Create a new pyftpdlib server with the socket and handler we've configured
+        # Create an independent IOLoop instance for the current thread to use,
+        # which prevents multiple server threads from competing for the global socket map.
+        server = FTPServer(self._socket, handler, ioloop=IOLoop())
 
         while not self.shutdown_event.is_set():
-            self.serve_forever(timeout=1, blocking=False, handle_exit=False)
+            server.serve_forever(timeout=1, blocking=False, handle_exit=False)
 
-        self.close_all()
+        server.close_all()
 
     def stop(self):
         """
