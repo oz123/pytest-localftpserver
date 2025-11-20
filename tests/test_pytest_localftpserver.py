@@ -16,7 +16,6 @@ import pytest
 import ssl
 
 from pytest_localftpserver.plugin import PytestLocalFTPServer
-from pytest_localftpserver.servers import USE_PROCESS
 from pytest_localftpserver.helper_functions import DEFAULT_CERTFILE
 
 
@@ -229,12 +228,8 @@ def run_ftp_stopped_test(ftpserver_fixture):
     """
     ftpserver_fixture.stop()
     ftp = FTP()
-    if USE_PROCESS:
-        with pytest.raises((ConnectionRefusedError, ConnectionResetError)):
-            ftp.connect("localhost", port=ftpserver_fixture.server_port)
-    else:
-        with pytest.raises(OSError):
-            ftp.connect("localhost", port=ftpserver_fixture.server_port)
+    with pytest.raises(OSError):
+        ftp.connect("localhost", port=ftpserver_fixture.server_port)
 
 
 # ACTUAL TESTS
