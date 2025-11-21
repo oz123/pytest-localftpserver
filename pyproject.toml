@@ -33,8 +33,7 @@ classifiers = [
 dependencies = [
   'pyftpdlib>=1.2.0',
   'PyOpenSSL',
-  'pytest',
-  'cryptography>=43'
+  'pytest'
 ]
 
 [tool.setuptools]
