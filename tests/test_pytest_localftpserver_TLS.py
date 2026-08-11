@@ -158,4 +158,4 @@ def test_wrong_cert_exception():
     wrong_cert = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                               "not_a_valid_cert.pem"))
     with pytest.raises(InvalidCertificateError):
-        SimpleFTPServer(use_TLS=True, certfile=wrong_cert)
+        SimpleFTPServer(use_TLS=True, certfile=wrong_cert).run()
