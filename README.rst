@@ -5,7 +5,7 @@ PyTest FTP Server
 .. image:: https://img.shields.io/pypi/v/pytest_localftpserver.svg
         :target:  https://pypi.org/project/pytest-localftpserver/
 
-.. image:: https://camo.githubusercontent.com/89b9f56d30241e30f546daf9f43653f08e920f16/68747470733a2f2f696d672e736869656c64732e696f2f636f6e64612f766e2f636f6e64612d666f7267652f7079746573742d6c6f63616c6674707365727665722e737667
+.. image:: https://anaconda.org/conda-forge/pytest-localftpserver/badges/version.svg
         :target:  https://anaconda.org/conda-forge/pytest-localftpserver
 
 .. image:: https://img.shields.io/pypi/pyversions/pytest_localftpserver.svg
@@ -28,16 +28,6 @@ A PyTest plugin which provides an FTP fixture for your tests
 
 * Free software: MIT license
 * Documentation: https://pytest-localftpserver.readthedocs.io/en/latest/index.html
-
-Attention!
-----------
-
-As of version ``1.0.0`` the support for python 2.7 and 3.4 was dropped.
-If you need to support those versions you should pin the version to ``0.6.0``,
-i.e. add the following lines to your "requirements_dev.txt"::
-
-        # pytest_localftpserver==0.6.0
-        https://github.com/oz123/pytest-localftpserver/archive/v0.6.0.zip
 
 
 Usage Quickstart:
